@@ -1,0 +1,22 @@
+# Build dependencies
+base-devel
+libX11-devel
+libXft-devel
+libXinerama-devel
+git
+
+xorg-minimal
+
+# Pre-built suckless tools
+slstatus
+dmenu
+st
+
+
+# Nerd-fonts
+font-open-dyslexic-ttf
+nerd-fonts-symbols-ttf
+
+
+# Miscellaneous
+neofetch

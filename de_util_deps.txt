@@ -1,0 +1,7 @@
+chezmoi
+
+neovim
+
+eza
+
+yazi
