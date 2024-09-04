@@ -4,7 +4,7 @@
 cd /opt
 
 echo "Installing dwm"
-GIT_SSL_NO_VERIFY=$1 git clone https://git.suckless.org/dwm
+sudo GIT_SSL_NO_VERIFY=$1 git clone https://git.suckless.org/dwm
 cd dwm
 git checkout -b my_dwm
 
