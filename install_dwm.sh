@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # dwm is installed into opt
 cd /opt
 

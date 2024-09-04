@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Installing other utilites of my desktop environment
 if [ "$EUID" -ne 0 ]; then
   echo "The script has to be run as root."
