@@ -18,14 +18,16 @@ utilities. Nevertheless, it can include software that outright sucks.
 
 To install the full desktop environment, run:
 
-``` git clone https://github.com/kalocsaibotond/void-rice
+```bash
+git clone https://github.com/kalocsaibotond/void-rice
 ./install_de_base.sh; ./install_de_utils.sh
 ```
 
 To install without SSL verification, run:
 
-``` GIT_SSL_NO_VERIFY=true git clone https://github.com/kalocsaibotond/void-rice
-./install_de_base.sh $true; ./install_de_utils.sh $true
+```bash
+GIT_SSL_NO_VERIFY=true git clone https://github.com/kalocsaibotond/void-rice
+./install_de_base.sh true; ./install_de_utils.sh true
 ```
 
 The overarching aim of my overall desktop environment is to optimise for
