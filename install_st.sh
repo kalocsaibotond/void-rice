@@ -10,12 +10,14 @@ sudo git checkout -b my_st
 
 # Patching
 sudo mkdir patches
+cd patches
 if [ true = "$1" ]; then # Downloading patches
   sudo wget --no-check-certificate \
     https://st.suckless.org/patches/font2/st-font2-0.8.5.diff
 else
   sudo wget https://st.suckless.org/patches/font2/st-font2-0.8.5.diff
 fi
+cd ..
 sudo git apply patches/st-font2-0.8.5.diff
 
 sudo git add -A
