@@ -12,7 +12,6 @@ xorg-apps
 # Pre-built suckless tools
 slstatus
 dmenu
-st
 
 
 # Nerd-fonts
