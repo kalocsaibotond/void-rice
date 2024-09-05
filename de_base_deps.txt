@@ -4,8 +4,10 @@ libX11-devel
 libXft-devel
 libXinerama-devel
 git
+wget
 
 xorg-minimal
+xorg-apps
 
 # Pre-built suckless tools
 slstatus
