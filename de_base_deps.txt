@@ -14,11 +14,9 @@ xorg-apps
 slstatus
 dmenu
 
-
 # Nerd-fonts
 font-open-dyslexic-ttf
 nerd-fonts-symbols-ttf
-
 
 # Miscellaneous
 neofetch

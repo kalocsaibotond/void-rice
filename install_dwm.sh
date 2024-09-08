@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# dwm is installed into opt
-cd /opt
-
-echo "Installing dwm"
+echo "\nInstalling dwm\n"
 sudo GIT_SSL_NO_VERIFY=$1 git clone https://git.suckless.org/dwm
 cd dwm
 sudo git checkout -b my_dwm
