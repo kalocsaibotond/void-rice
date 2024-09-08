@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "\nInstalling dwm\n"
+printf "\nInstalling dwm\n\n"
 sudo GIT_SSL_NO_VERIFY=$1 git clone https://git.suckless.org/dwm
 cd dwm
 sudo git checkout -b my_dwm
