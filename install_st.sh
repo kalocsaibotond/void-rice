@@ -34,9 +34,10 @@ printf "\nConfiguring patches\n\n"
 sudo cp config.def.h config.h
 
 printf "\nConfiguring font2 patch:\n\n"
-sudo sed -i 's/Liberation Mono/'$(
-)'OpenDyslexicMono/' config.h
-sudo sed -i '/Inconsolata for Powerline/d' config.h
+sudo sed -i 's/Liberation Mono/OpenDyslexicMono/' config.h
+sudo sed -i 's/^.\+Inconsolata for Powerline.\+$/'$(
+)'\t"Noto Color Emoji:pixelsize=11:antialias=true:autohint=true",/' \
+  config.h
 sudo sed -i 's/^.\+Hack Nerd Font Mono.\+$/'$(
 )'\t"Symbols Nerd Font Mono:pixelsize=11:antialias=true:autohint=true",/' \
   config.h

@@ -18,6 +18,7 @@ physlock
 
 # Nerd-fonts
 font-open-dyslexic-ttf
+noto-fonts-emoji
 nerd-fonts-symbols-ttf
 
 # Miscellaneous
