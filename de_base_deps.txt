@@ -6,15 +6,17 @@ libXinerama-devel
 git
 wget
 
+# Graphical desktop environment
 xorg-minimal
 xorg-fonts  # Without it a lot of symbols would miss
 xorg-apps
-
-# Pre-built suckless tools
 slstatus
 dmenu
 
-physlock
+# Console desktop environment
+tmux  # Unfortunately only tmux, zellij has true color support :(
+physlock  # Lock out
+gpm  # Mouse server support in console
 
 # Nerd-fonts
 font-open-dyslexic-ttf

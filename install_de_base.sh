@@ -16,6 +16,10 @@ sudo xbps-reconfigure -f fontconfig
 git config --global user.email "kalocsaibotond@gmail.com"
 git config --global user.name "Botond Kalocsai"
 
+# Configuring gpm
+touch /etc/sv/gpm/down # I dont want it to start at boot
+ln -s /etc/sv/gpm /var/service
+
 ./install_dwm.sh $1
 ./install_st.sh $1
 

@@ -1,3 +1,9 @@
+# Power management
+tlp
+acpi
+powertop
+
+
 flatpak
 
 chezmoi
