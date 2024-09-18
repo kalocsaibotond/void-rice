@@ -15,10 +15,13 @@ if [ true = "$1" ]; then # Downloading patches without SSL check
     https://st.suckless.org/patches/boxdraw/st-boxdraw_v2-0.8.5.diff
   sudo wget --no-check-certificate \
     https://st.suckless.org/patches/glyph_wide_support/st-glyph-wide-support-boxdraw-20220411-ef05519.diff
+  sudo wget --no-check-certificate \
+    https://st.suckless.org/patches/w3m/st-w3m-0.8.3.diff
 else
   sudo wget https://st.suckless.org/patches/font2/st-font2-0.8.5.diff
   sudo wget https://st.suckless.org/patches/boxdraw/st-boxdraw_v2-0.8.5.diff
   sudo wget https://st.suckless.org/patches/glyph_wide_support/st-glyph-wide-support-boxdraw-20220411-ef05519.diff
+  sudo wget https://st.suckless.org/patches/w3m/st-w3m-0.8.3.diff
 fi
 cd ..
 
@@ -29,6 +32,8 @@ printf "\nApplying boxdraw patch:\n\n"
 sudo patch -p1 <patches/st-boxdraw_v2-0.8.5.diff
 printf "\nApplying glyph wide support patch:\n\n"
 sudo git apply patches/st-glyph-wide-support-boxdraw-20220411-ef05519.diff
+printf "\nApplying w3m patch:\n\n"
+sudo patch -p1 <patches/st-w3m-0.8.3.diff
 
 printf "\nConfiguring patches\n\n"
 sudo cp config.def.h config.h

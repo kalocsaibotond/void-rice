@@ -14,9 +14,11 @@ slstatus
 dmenu
 
 # Console desktop environment
-tmux  # Unfortunately only tmux, zellij has true color support :(
-physlock  # Lock out
-gpm  # Mouse server support in console
+tmux
+physlock
+gpm
+w3m
+w3m-img  # Needed for image support in w3m console browser
 
 # Nerd-fonts
 font-open-dyslexic-ttf
