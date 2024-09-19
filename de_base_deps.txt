@@ -14,7 +14,7 @@ slstatus
 dmenu
 
 # Console desktop environment
-tmux
+tmux  # It has true color, proper mouse support and performant rendering.
 physlock
 gpm
 w3m
@@ -27,3 +27,4 @@ nerd-fonts-symbols-ttf
 
 # Miscellaneous
 neofetch
+void-repo-nonfree
