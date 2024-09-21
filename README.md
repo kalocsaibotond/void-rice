@@ -19,6 +19,8 @@ To install the full desktop environment, run:
 
 ```bash
 git clone https://github.com/kalocsaibotond/void-rice
+cd void-rice
+chmod +x *
 ./install_de_base.sh; ./install_de_utils.sh
 ```
 
@@ -26,6 +28,8 @@ To install without SSL verification, run:
 
 ```bash
 GIT_SSL_NO_VERIFY=true git clone https://github.com/kalocsaibotond/void-rice
+cd void-rice
+chmod +x *
 ./install_de_base.sh true; ./install_de_utils.sh true
 ```
 
