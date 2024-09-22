@@ -3,8 +3,9 @@ tlp
 acpi
 powertop
 
+flatpak  # as a backup
 
-flatpak
+curl
 
 chezmoi
 
