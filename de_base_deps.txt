@@ -10,8 +10,8 @@ wget
 xorg-minimal
 xorg-fonts  # Without it a lot of symbols would miss
 xorg-apps
-slstatus
 dmenu
+slstatus
 
 # Console desktop environment
 tmux  # It has true color, proper mouse support and performant rendering.

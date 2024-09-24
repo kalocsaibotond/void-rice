@@ -21,9 +21,9 @@ cd ..
 
 printf "\nApplying patches\n\n"
 printf "\nApplying clientnumber patch:\n\n"
-sudo git apply patches/tabbed-clientnumber-0.6.diff
+sudo patch -p1 <patches/tabbed-clientnumber-0.6.diff
 printf "\nApplying xft patch:\n\n"
-sudo git apply patches/tabbed-0.6-xft.diff
+sudo patch -p1 <patches/tabbed-0.6-xft.diff
 
 printf "\nConfiguring patches\n\n"
 sudo cp config.def.h config.h
