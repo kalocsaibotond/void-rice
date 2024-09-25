@@ -12,6 +12,8 @@ if [ true = "$1" ]; then # Downloading patches without SSL check
   sudo wget --no-check-certificate \
     https://st.suckless.org/patches/font2/st-font2-0.8.5.diff
   sudo wget --no-check-certificate \
+    https://st.suckless.org/patches/charoffsets/st-charoffsets-20220311-0.8.5.diff
+  sudo wget --no-check-certificate \
     https://st.suckless.org/patches/boxdraw/st-boxdraw_v2-0.8.5.diff
   sudo wget --no-check-certificate \
     https://st.suckless.org/patches/glyph_wide_support/st-glyph-wide-support-boxdraw-20220411-ef05519.diff
@@ -19,6 +21,7 @@ if [ true = "$1" ]; then # Downloading patches without SSL check
     https://st.suckless.org/patches/w3m/st-w3m-0.8.3.diff
 else
   sudo wget https://st.suckless.org/patches/font2/st-font2-0.8.5.diff
+  sudo wget https://st.suckless.org/patches/charoffsets/st-charoffsets-20220311-0.8.5.diff
   sudo wget https://st.suckless.org/patches/boxdraw/st-boxdraw_v2-0.8.5.diff
   sudo wget https://st.suckless.org/patches/glyph_wide_support/st-glyph-wide-support-boxdraw-20220411-ef05519.diff
   sudo wget https://st.suckless.org/patches/w3m/st-w3m-0.8.3.diff
@@ -28,6 +31,8 @@ cd ..
 printf "\nApplying patches\n\n"
 printf "\nApplying font2 patch:\n\n"
 sudo git apply patches/st-font2-0.8.5.diff
+printf "\nApplying charoffsets patch:\n\n"
+sudo git apply patches/st-charoffsets-20220311-0.8.5.diff
 printf "\nApplying boxdraw patch:\n\n"
 sudo patch -p1 <patches/st-boxdraw_v2-0.8.5.diff
 printf "\nApplying glyph wide support patch:\n\n"
@@ -39,13 +44,19 @@ printf "\nConfiguring patches\n\n"
 sudo cp config.def.h config.h
 
 printf "\nConfiguring font2 patch:\n\n"
-sudo sed -i 's/Liberation Mono/OpenDyslexicMono/' config.h
+sudo sed -i 's/Liberation Mono[^"]\+/'$(
+)'OpenDyslexicMono:pixelsize=12:antialias=true:autohint=true/' \
+  config.h
 sudo sed -i 's/^.\+Inconsolata for Powerline.\+$/'$(
-)'\t"Noto Color Emoji:pixelsize=11:antialias=true:autohint=true",/' \
+)'\t"Noto Color Emoji:pixelsize=12:antialias=true:autohint=true",/' \
   config.h
 sudo sed -i 's/^.\+Hack Nerd Font Mono.\+$/'$(
-)'\t"Symbols Nerd Font Mono:pixelsize=11:antialias=true:autohint=true",/' \
+)'\t"Symbols Nerd Font Mono:pixelsize=12:antialias=true:autohint=true",/' \
   config.h
+
+printf "\nConfiguring charoffsets patch:\n\n"
+sudo sed -i 's/chscale = 1.0/chscale = 1.5/' config.h
+sudo sed -i 's/cyoffset = 0/cyoffset = 3/' config.h
 
 printf "\nConfiguring boxdraw patch:\n\n"
 sudo sed -i 's/boxdraw = 0/boxdraw = 1/' config.h
