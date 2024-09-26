@@ -60,8 +60,8 @@ sudo sed -i 's/short cxoffset/float cxpropoffset/' config.h
 sudo sed -i 's/short cyoffset/float cypropoffset/' config.h
 sudo sed -i 's/xp + cxoffset/round(xp + cxpropoffset * usedfontsize)/' x.c
 sudo sed -i 's/yp + cyoffset/round(yp + cypropoffset * usedfontsize)/' x.c
-sudo sed -i 's/chscale = 1.0/chscale = 3 / 2/' config.h # Configuring
-sudo sed -i 's/cypropoffset = 0/cypropoffset = 1 / 3/' config.h
+sudo sed -i 's/chscale = 1\.0/chscale = 3.0 \/ 2.0/' config.h # Configuring
+sudo sed -i 's/cypropoffset = 0/cypropoffset = 1.0 \/ 3.0/' config.h
 
 printf "\nConfiguring boxdraw patch:\n\n"
 sudo sed -i 's/boxdraw = 0/boxdraw = 1/' config.h
