@@ -54,9 +54,14 @@ sudo sed -i 's/^.\+Hack Nerd Font Mono.\+$/'$(
 )'\t"Symbols Nerd Font Mono:pixelsize=12:antialias=true:autohint=true",/' \
   config.h
 
-printf "\nConfiguring charoffsets patch:\n\n"
-sudo sed -i 's/chscale = 1.0/chscale = 1.5/' config.h
-sudo sed -i 's/cyoffset = 0/cyoffset = 3/' config.h
+printf "\nHacking and Configuring charoffsets patch:\n\n"
+# HACK: Make the offset alway proportional to the font size!
+sudo sed -i 's/short cxoffset/float cxpropoffset/' config.h
+sudo sed -i 's/short cyoffset/float cypropoffset/' config.h
+sudo sed -i 's/xp + cxoffset/round(xp + cxpropoffset * usedfontsize)/' x.c
+sudo sed -i 's/yp + cyoffset/round(yp + cypropoffset * usedfontsize)/' x.c
+sudo sed -i 's/chscale = 1.0/chscale = 3 / 2/' config.h # Configuring
+sudo sed -i 's/cypropoffset = 0/cypropoffset = 1 / 3/' config.h
 
 printf "\nConfiguring boxdraw patch:\n\n"
 sudo sed -i 's/boxdraw = 0/boxdraw = 1/' config.h
