@@ -8,11 +8,10 @@ sudo git checkout -b my_st
 printf "\nDownloading patches:\n\n"
 sudo mkdir patches
 cd patches
+cp ../../local_patches/st/charpropoffsets/st-charpropoffsets-with-wide-glyph-support-20240924-0.9.2.diff .
 if [ true = "$1" ]; then # Downloading patches without SSL check
   sudo wget --no-check-certificate \
     https://st.suckless.org/patches/font2/st-font2-0.8.5.diff
-  sudo wget --no-check-certificate \
-    https://st.suckless.org/patches/charoffsets/st-charoffsets-20220311-0.8.5.diff
   sudo wget --no-check-certificate \
     https://st.suckless.org/patches/boxdraw/st-boxdraw_v2-0.8.5.diff
   sudo wget --no-check-certificate \
@@ -21,7 +20,6 @@ if [ true = "$1" ]; then # Downloading patches without SSL check
     https://st.suckless.org/patches/w3m/st-w3m-0.8.3.diff
 else
   sudo wget https://st.suckless.org/patches/font2/st-font2-0.8.5.diff
-  sudo wget https://st.suckless.org/patches/charoffsets/st-charoffsets-20220311-0.8.5.diff
   sudo wget https://st.suckless.org/patches/boxdraw/st-boxdraw_v2-0.8.5.diff
   sudo wget https://st.suckless.org/patches/glyph_wide_support/st-glyph-wide-support-boxdraw-20220411-ef05519.diff
   sudo wget https://st.suckless.org/patches/w3m/st-w3m-0.8.3.diff
@@ -31,12 +29,12 @@ cd ..
 printf "\nApplying patches\n\n"
 printf "\nApplying font2 patch:\n\n"
 sudo git apply patches/st-font2-0.8.5.diff
-printf "\nApplying charoffsets patch:\n\n"
-sudo git apply patches/st-charoffsets-20220311-0.8.5.diff
 printf "\nApplying boxdraw patch:\n\n"
 sudo patch -p1 <patches/st-boxdraw_v2-0.8.5.diff
 printf "\nApplying glyph wide support patch:\n\n"
 sudo git apply patches/st-glyph-wide-support-boxdraw-20220411-ef05519.diff
+printf "\nApplying local charpropoffsets patch:\n\n"
+sudo git apply patches/st-charpropoffsets-with-wide-glyph-support-20240924-0.9.2.diff
 printf "\nApplying w3m patch:\n\n"
 sudo patch -p1 <patches/st-w3m-0.8.3.diff
 
@@ -54,13 +52,8 @@ sudo sed -i 's/^.\+Hack Nerd Font Mono.\+$/'$(
 )'\t"Symbols Nerd Font Mono:pixelsize=12:antialias=true:autohint=true",/' \
   config.h
 
-printf "\nHacking and Configuring charoffsets patch:\n\n"
-# HACK: Make the offset alway proportional to the font size!
-sudo sed -i 's/short cxoffset/float cxpropoffset/' config.h
-sudo sed -i 's/short cyoffset/float cypropoffset/' config.h
-sudo sed -i 's/xp + cxoffset/round(xp + cxpropoffset * usedfontsize)/' x.c
-sudo sed -i 's/yp + cyoffset/round(yp + cypropoffset * usedfontsize)/' x.c
-sudo sed -i 's/chscale = 1\.0/chscale = 3.0 \/ 2.0/' config.h # Configuring
+printf "\nConfiguring local charpropoffsets patch:\n\n"
+sudo sed -i 's/chscale = 1\.0/chscale = 3.0 \/ 2.0/' config.h
 sudo sed -i 's/cypropoffset = 0/cypropoffset = 1.0 \/ 3.0/' config.h
 
 printf "\nConfiguring boxdraw patch:\n\n"

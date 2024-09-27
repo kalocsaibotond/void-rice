@@ -1,0 +1,43 @@
+From 65bd765f61025d2fdb6e6feba983e24e71b2dbac Mon Sep 17 00:00:00 2001
+From: Botond Kalocsai <botond.kalocsai@3dhistech.com>
+Date: Thu, 26 Sep 2024 20:31:35 +0200
+Subject: [PATCH] feat: Add character rendering font size proportional offset
+   for correcting different font dimensions.
+
+---
+ config.def.h | 3 +++
+ x.c          | 4 ++--
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/config.def.h b/config.def.h
+index 2cd740a..66f8c24 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -28,6 +28,9 @@ char *vtiden = "\033[?6c";
+ /* Kerning / character bounding-box multipliers */
+ static float cwscale = 1.0;
+ static float chscale = 1.0;
++/* Character rendering font size proportional offset scale values. */
++static float cxpropoffset = 0;
++static float cypropoffset = 0;
+ 
+ /*
+  * word delimiter string
+diff --git a/x.c b/x.c
+index d73152b..a1e24d4 100644
+--- a/x.c
++++ b/x.c
+@@ -1291,8 +1291,8 @@ xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len, int x
+ 		if (glyphidx) {
+ 			specs[numspecs].font = font->match;
+ 			specs[numspecs].glyph = glyphidx;
+-			specs[numspecs].x = (short)xp;
+-			specs[numspecs].y = (short)yp;
++			specs[numspecs].x = (short)round(xp + cxpropoffset * usedfontsize);
++			specs[numspecs].y = (short)round(yp + cypropoffset * usedfontsize);
+ 			xp += runewidth;
+ 			numspecs++;
+ 			continue;
+-- 
+2.46.1.windows.1
+
