@@ -8,7 +8,7 @@ sudo git checkout -b my_st
 printf "\nDownloading patches:\n\n"
 sudo mkdir patches
 cd patches
-sudo cp ../../local_patches/st/charpropoffsets/st-charpropoffsets-with-wide-glyph-support-20240924-0.9.2.diff .
+sudo cp ../../local_patches/st/charpropoffsets/st-charpropoffsets-with-wide-glyph-support-20240927-0.9.2.diff .
 if [ true = "$1" ]; then # Downloading patches without SSL check
   sudo wget --no-check-certificate \
     https://st.suckless.org/patches/font2/st-font2-0.8.5.diff
@@ -34,7 +34,7 @@ sudo patch -p1 <patches/st-boxdraw_v2-0.8.5.diff
 printf "\nApplying glyph wide support patch:\n\n"
 sudo git apply patches/st-glyph-wide-support-boxdraw-20220411-ef05519.diff
 printf "\nApplying local charpropoffsets patch:\n\n"
-sudo git apply patches/st-charpropoffsets-with-wide-glyph-support-20240924-0.9.2.diff
+sudo git apply patches/st-charpropoffsets-with-wide-glyph-support-20240927-0.9.2.diff
 printf "\nApplying w3m patch:\n\n"
 sudo patch -p1 <patches/st-w3m-0.8.3.diff
 
