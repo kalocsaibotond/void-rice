@@ -8,7 +8,7 @@ sudo git checkout -b my_st
 printf "\nDownloading patches:\n\n"
 sudo mkdir patches
 cd patches
-cp ../../local_patches/st/charpropoffsets/st-charpropoffsets-with-wide-glyph-support-20240924-0.9.2.diff .
+sudo cp ../../local_patches/st/charpropoffsets/st-charpropoffsets-with-wide-glyph-support-20240924-0.9.2.diff .
 if [ true = "$1" ]; then # Downloading patches without SSL check
   sudo wget --no-check-certificate \
     https://st.suckless.org/patches/font2/st-font2-0.8.5.diff
