@@ -14,8 +14,8 @@ sudo ln -s /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf \
 sudo xbps-reconfigure -f fontconfig
 
 printf "\nConfiguring git:\n\n"
-git config --global user.email "kalocsaibotond@gmail.com"
-git config --global user.name "Botond Kalocsai"
+sudo git config --global user.email "kalocsaibotond@gmail.com"
+sudo git config --global user.name "Botond Kalocsai"
 
 printf "\nConfiguring gpm to not start at boot:\n\n"
 # Configuring gpm
