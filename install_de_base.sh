@@ -32,5 +32,5 @@ if ! grep -q "$suckless_xinitrc" ~/.xinitrc; then
   echo "$suckless_xinitrc" >>~/.xinitrc
 fi
 if ! grep -q "startx" ~/.bash_profile; then
-  printf "\n\nstartx\n" >>~/.bash_profile
+  printf "\nstartx\n" >>~/.bash_profile
 fi

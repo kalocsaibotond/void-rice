@@ -10,11 +10,11 @@ sudo flatpak remote-add --if-not-exists flathub \
   https://flathub.org/repo/flathub.flatpakrepo
 
 printf "\nInstalling and setting up Linuxbrew\n\n"
-sudo bash -c \
+bash -c \
   "$(wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
 brew_path_add='eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
 if ! grep -q "$brew_path_add" ~/.bash_profile; then
-  printf "\n\n$brew_path_add\n" >>~/.bash_profile
+  printf "\n$brew_path_add\n" >>~/.bash_profile
 fi
 
 printf "\nInstall my dotfiles (with chezmoi)\n\n"
