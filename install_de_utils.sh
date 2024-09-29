@@ -13,8 +13,8 @@ printf "\nInstalling and setting up Linuxbrew\n\n"
 bash -c \
   "$(wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
 brew_path_add='eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
-if ! grep -q "$brew_path_add" ~/.bash_profile; then
-  printf "\n$brew_path_add\n" >>~/.bash_profile
+if ! grep -q "$brew_path_add" /etc/profile.d/*; then
+  echo "$brew_path_add" >/etc/profile.d/linuxbrew.sh
 fi
 
 printf "\nInstall my dotfiles (with chezmoi)\n\n"
