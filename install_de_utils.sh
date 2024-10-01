@@ -10,8 +10,14 @@ sudo flatpak remote-add --if-not-exists flathub \
   https://flathub.org/repo/flathub.flatpakrepo
 
 printf "\nInstalling and setting up Linuxbrew\n\n"
-bash -c \
-  "$(wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
+if [ true = "$1" ]; then # Downloading patches without SSL check
+  bash -c \
+    "$(wget --no-check-certificate -O \
+      - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
+else
+  bash -c \
+    "$(wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
+fi
 brew_path_add='eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
 if ! grep -q "$brew_path_add" /etc/profile.d/*; then
   echo "$brew_path_add" >linuxbrew.sh

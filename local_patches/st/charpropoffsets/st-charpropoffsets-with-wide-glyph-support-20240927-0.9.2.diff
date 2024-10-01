@@ -55,7 +55,7 @@ index b093df0..a2b30dc 100644
 -            XftDrawRect(xw.draw, fg, winx, winy + dc.font.ascent + 1,
 -                        width, 1);
 +            XftDrawRect(xw.draw, fg, winx, round(cypropoffset * usedfontsize
-+			   		      + winy + dc.font.ascent + 1), width, 1);
++                        + winy + dc.font.ascent + 1), width, 1);
          }
  
          if (base.mode & ATTR_STRUCK) {

@@ -30,7 +30,6 @@ sd
 
 miller
 dasel
-fq
 fx
 jqp
 
