@@ -31,7 +31,6 @@ sd
 miller
 dasel
 fx
-jqp
 
 qrencode
 ImageMagick
@@ -45,7 +44,6 @@ neovim
 curl  # Needed for linuxbrew
 xh
 gping
-dog
 netcat
 
 # VCS and remote repository management
