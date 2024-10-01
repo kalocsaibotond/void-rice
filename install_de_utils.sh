@@ -14,7 +14,15 @@ bash -c \
   "$(wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
 brew_path_add='eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
 if ! grep -q "$brew_path_add" /etc/profile.d/*; then
-  echo "$brew_path_add" >/etc/profile.d/linuxbrew.sh
+  echo "$brew_path_add" >linuxbrew.sh
+  sudo mv linuxbrew.sh /etc/profile.d/
+fi
+
+printf "\nSetting up Zoxide\n\n"
+zoxide_init='eval "$(zoxide init bash)"'
+if ! grep -q "$zoxide_init" /etc/bash/bashrc.d/*; then
+  echo "$zoxide_init" >zoxide.sh
+  sudo mv zoxide.sh /etc/bash/bashrc.d/
 fi
 
 printf "\nInstall my dotfiles (with chezmoi)\n\n"

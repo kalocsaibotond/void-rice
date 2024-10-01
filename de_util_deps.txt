@@ -3,14 +3,72 @@ tlp
 acpi
 powertop
 
-flatpak  # as a backup
+flatpak  # as a backup package manager
 
-curl
+# Console workflow tools
 
-chezmoi
+# Directory tree management
+zoxide
+eza
+fd
+fzf
+yazi
+mc
 
+dust
+gdu
+duf
+
+# File management
+bat
+moar
+difftastic
+delta
+hexyl
+ripgrep
+sd
+
+miller
+dasel
+fq
+fx
+jqp
+
+qrencode
+ImageMagick
+ffmpeg
+
+ctags
+tree-sitter
 neovim
 
-eza
+# Network management
+curl  # Needed for linuxbrew
+xh
+gping
+dog
+netcat
 
-yazi
+# VCS and remote repository management
+lazygit
+github-cli
+gopass
+chezmoi
+
+# Process management
+procs
+hyperfine
+btop
+
+# Scientific tools
+gnuplot
+qalculate
+
+# MIscellaneous
+tldr
+nodejs  # Needed for LSP servers
+qemu
+
+# GUI utilites
+gimp
+inkscape
