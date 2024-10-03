@@ -24,6 +24,7 @@ brew_init='eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
 if ! grep -q "$brew_init" /etc/profile.d/*; then
   echo "$brew_init" >linuxbrew.sh
   chmod o+rx linuxbrew.sh
+  sudo mkdir -p /etc/profile.d/
   sudo mv linuxbrew.sh /etc/profile.d/
 fi
 
@@ -32,6 +33,7 @@ zoxide_init='eval "$(zoxide init bash)"'
 if ! grep -q "$zoxide_init" /etc/bash/bashrc.d/*; then
   echo "$zoxide_init" >zoxide.sh
   chmod o+rx zoxide.sh
+  sudo mkdir -p /etc/bash/bashrc.d/
   sudo mv zoxide.sh /etc/bash/bashrc.d/
 fi
 

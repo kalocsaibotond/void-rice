@@ -31,6 +31,7 @@ suckless_xinitrc="setxkbmap hu & slstatus & exec dwm"
 if ! grep -q "$suckless_xinitrc" /etc/X11/xinit/xinitrc.d/*; then
   echo "$suckless_xinitrc" >99-suckless-xinitrc.sh
   chmod o+rx 99-suckless-xinitrc.sh
+  sudo mkdir -p /etc/X11/xinit/xinitrc.d/
   sudo mv 99-suckless-xinitrc.sh /etc/X11/xinit/xinitrc.d/
 fi
 sudo sed -z -i 's/twm.*//' /etc/X11/xinit/xinitrc # Cleaning global xinitrc up
