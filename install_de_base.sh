@@ -26,11 +26,15 @@ sudo ln -s /etc/sv/gpm /var/service
 ./install_st.sh $1
 ./install_tabbed.sh $1
 
-printf "\nSetting up xinitrc\n\n"
+printf "\nSetting up global xinitrc\n\n"
 suckless_xinitrc="setxkbmap hu & slstatus & exec dwm"
-if ! grep -q "$suckless_xinitrc" ~/.xinitrc; then
-  echo "$suckless_xinitrc" >>~/.xinitrc
+if ! grep -q "$suckless_xinitrc" /etc/X11/xinit/xinitrc.d/*; then
+  echo "$suckless_xinitrc" >99-suckless-xinitrc.sh
+  chmod o+rx 99-suckless-xinitrc.sh
+  sudo mv 99-suckless-xinitrc.sh /etc/X11/xinit/xinitrc.d/
 fi
+sudo sed -z -i 's/twm.*//' /etc/X11/xinit/xinitrc # Cleaning global xinitrc up
+
 if ! grep -q "startx" ~/.bash_profile; then
   printf "\nstartx\n" >>~/.bash_profile
 fi
