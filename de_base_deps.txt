@@ -1,8 +1,10 @@
 # Build dependencies
 base-devel
-libX11-devel
-libXft-devel
-libXinerama-devel
+libX11-devel  # For st
+libXft-devel  # For dwm, st
+libXinerama-devel  # For dwm
+libwebkit2gtk41-devel  # For surf
+gcr-devel  # For surf
 git
 wget
 

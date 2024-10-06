@@ -25,6 +25,7 @@ sudo ln -s /etc/sv/gpm /var/service
 ./install_dwm.sh $1
 ./install_st.sh $1
 ./install_tabbed.sh $1
+./install_surf.sh $1
 
 printf "\nSetting up global xinitrc\n\n"
 suckless_xinitrc="setxkbmap hu & slstatus & exec dwm"
