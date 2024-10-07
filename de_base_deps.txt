@@ -3,7 +3,7 @@ base-devel
 libX11-devel  # For st
 libXft-devel  # For dwm, st
 libXinerama-devel  # For dwm
-libwebkit2gtk41-devel  # For surf
+webkit2gtk-devel  # For surf
 gcr-devel  # For surf
 git
 wget
