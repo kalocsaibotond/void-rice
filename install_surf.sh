@@ -39,15 +39,15 @@ printf "\nConfiguring patches\n\n"
 sudo cp config.def.h config.h
 
 printf "\nConfiguring searchengines patch\n\n"
-sudo sed -i 's/^\(.*\)\{ " ", "https[^"]\+" \},/'$(
-)'\1\{ " ", "google.com\/search?q=%s" \},/' \
+sudo sed -i 's/^\(.*\){ " ", "https[^"]\+" },/'$(
+)'\1{ " ", "https:\/\/google.com\/search?q=%s" },/' \
   config.h
 sudo sed -i \
-  's/^\(.*\)\{ "osrs ", "https[^"]\+" \},/'$(
-  )'\1\{ "w ", "wikipedia.org\/wiki\/%s" \},\n'$(
-  )'\1\{ "d ", "dictzone.com\/angol-magyar-szotar\/%s" \},\n'$(
-  )'\1\{ "de ", "dictzone.com\/magyar-angol-szotar\/%s" \},\n'$(
-  )'\1\{ "y ", "youtube.com\/results?search_query=%s" \},/' \
+  's/^\(.*\){ "osrs ", "https[^"]\+" },/'$(
+  )'\1{ "w ", "https:\/\/wikipedia.org\/wiki\/%s" },\n'$(
+  )'\1{ "d ", "https:\/\/dictzone.com\/angol-magyar-szotar\/%s" },\n'$(
+  )'\1{ "de ", "https:\/\/dictzone.com\/magyar-angol-szotar\/%s" },\n'$(
+  )'\1{ "y ", "https:\/\/youtube.com\/results?search_query=%s" },/' \
   config.h
 
 printf "\nConfiguring startgo patch\n\n"
