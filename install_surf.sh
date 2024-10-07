@@ -39,19 +39,19 @@ printf "\nConfiguring patches\n\n"
 sudo cp config.def.h config.h
 
 printf "\nConfiguring searchengines patch\n\n"
-sudo sed -i 's/^\(.*\)\{ " ", "https:\/\/duckduckgo.com\/?q=%s" \},/'$(
-)'\1{ " ", "google.com/search?q=%s" },/' \
+sudo sed -i 's/^\(.*\)\{ " ", "https[^"]\+" \},/'$(
+)'\1\{ " ", "google.com\/search?q=%s" \},/' \
   config.h
 sudo sed -i \
-  's/^\(.*\)\{ "osrs ", "https:\/\/oldschool.runescape.wiki\/?search=%s" \},/'$(
-  )'\1{ "w ", "wikipedia.org/wiki/%s" },\n'$(
-  )'\1{ "d ", "dictzone.com/angol-magyar-szotar/%s" },\n'$(
-  )'\1{ "de ", "dictzone.com/magyar-angol-szotar/%s" },\n'$(
-  )'\1{ "y ", "youtube.com/results?search_query=%s" },/' \
+  's/^\(.*\)\{ "osrs ", "https[^"]\+" \},/'$(
+  )'\1\{ "w ", "wikipedia.org\/wiki\/%s" \},\n'$(
+  )'\1\{ "d ", "dictzone.com\/angol-magyar-szotar\/%s" \},\n'$(
+  )'\1\{ "de ", "dictzone.com\/magyar-angol-szotar\/%s" \},\n'$(
+  )'\1\{ "y ", "youtube.com\/results?search_query=%s" \},/' \
   config.h
 
 printf "\nConfiguring startgo patch\n\n"
-sed -i 's/startgo = 0/startgo = 1/' config.h
+sudo sed -i 's/startgo = 0/startgo = 1/' config.h
 
 sudo git add -A
 sudo git commit -m "feat: setup my base surf version"
