@@ -24,6 +24,7 @@ sudo ln -s /etc/sv/gpm /var/service
 
 ./install_dwm.sh $1
 ./install_st.sh $1
+./install_devour.sh $1
 ./install_tabbed.sh $1
 ./install_surf.sh $1
 
