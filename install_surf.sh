@@ -53,7 +53,7 @@ sudo sed -i \
 printf "\nConfiguring startgo patch\n\n"
 sudo sed -i 's/startgo = 0/startgo = 1/' config.h
 
-ln -sf ./surf-open.sh /usr/local/bin/tsurf
+ln -sf $(pwd)/surf-open.sh /usr/local/bin/tsurf
 
 sudo git add -A
 sudo git commit -m "feat: setup my base surf version"
