@@ -68,5 +68,6 @@ nodejs  # Needed for LSP servers
 qemu
 
 # GUI utilites
-gimp
+lyx  # it also gets texlive
 inkscape
+gimp

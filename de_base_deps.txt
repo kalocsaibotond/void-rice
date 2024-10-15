@@ -16,9 +16,10 @@ dmenu
 slstatus
 
 nsxiv
+fim
 mupdf
 zathura-pdf-mupdf
-ffplay
+mpv
 
 # Console desktop environment
 tmux  # It has true color, proper mouse support and performant rendering.
@@ -29,7 +30,6 @@ w3m-img  # Needed for image support in w3m console browser
 
 # Framebuffer only
 fbpdf  # Uses the mupdf library
-fbida-fbi
 
 # Nerd-fonts
 font-open-dyslexic-ttf
