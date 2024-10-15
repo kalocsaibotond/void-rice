@@ -15,7 +15,7 @@ xorg-apps
 dmenu
 slstatus
 
-nsxiv
+sxiv
 fim
 mupdf
 zathura-pdf-mupdf
