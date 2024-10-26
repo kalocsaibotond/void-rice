@@ -12,6 +12,7 @@ wget
 xorg-minimal
 xorg-fonts  # Without it a lot of symbols would miss
 xorg-apps
+xclip
 dmenu
 slstatus
 
@@ -23,6 +24,7 @@ mpv
 
 # Console desktop environment
 tmux  # It has true color, proper mouse support and performant rendering.
+reptyr
 physlock
 gpm
 w3m
