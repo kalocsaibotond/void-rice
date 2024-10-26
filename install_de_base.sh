@@ -9,7 +9,7 @@ printf "\nInstalling base desktop environment dependencies:\n\n"
 sudo SSL_NO_VERIFY_PEER=$1 xbps-install -Sy $(./parsedeps.sh de_base_deps.txt)
 
 printf "\nConfiguring fontconfig:\n\n"
-sudo ln -s /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf \
+sudo ln -sf /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf \
   /etc/fonts/conf.d/
 sudo xbps-reconfigure -f fontconfig
 
@@ -20,7 +20,7 @@ sudo git config --global user.name "Botond Kalocsai"
 printf "\nConfiguring gpm to not start at boot:\n\n"
 # Configuring gpm
 sudo touch /etc/sv/gpm/down # I dont want it to start at boot
-sudo ln -s /etc/sv/gpm /var/service
+sudo ln -sf /etc/sv/gpm /var/service
 
 ./install_dwm.sh $1
 ./install_st.sh $1
@@ -48,7 +48,7 @@ if ! [ -f /etc/shrc ] || ! grep -q "$sys_shrc" /etc/shrc; then
   echo "	$sys_shrc" >>shrc
   echo 'fi' >>shrc
   chmod o+rx shrc
-  sudo mv sh /etc/
+  sudo mv shrc /etc/
 fi
 sudo mkdir -p /etc/shrc.d
 
@@ -63,8 +63,8 @@ fi
 # Source POSIX shell configuration in bashrc
 source_env='. $ENV'
 sudo mkdir -p /etc/bash/bash.d/
-if ! grep -q "$source_env" /etc/bash/bash.d/*; then
+if ! grep -q "$source_env" /etc/bash/bashrc.d/*; then
   echo "$source_env" >00-source_env.sh
   chmod o+rx 00-source_env.sh
-  sudo mv 00-source_env.sh /etc/bash/bash.d/
+  sudo mv 00-source_env.sh /etc/bash/bashrc.d/
 fi

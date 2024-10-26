@@ -34,7 +34,7 @@ fx
 
 qrencode
 ImageMagick
-mutools
+mupdf-tools
 ffmpeg
 
 ctags
