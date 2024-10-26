@@ -63,7 +63,7 @@ fi
 
 # Source POSIX shell configuration in bashrc
 source_env='. $ENV'
-sudo mkdir -p /etc/bash/bash.d/
+sudo mkdir -p /etc/bash/bashrc.d/
 if ! grep -q "$source_env" /etc/bash/bashrc.d/*; then
   echo "$source_env" >00-source_env.sh
   chmod o+rx 00-source_env.sh
