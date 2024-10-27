@@ -3,6 +3,12 @@ tlp
 acpi
 powertop
 
+# Printing, scanning
+cups
+hplip  # For my HP printer
+cnijfilter2  # For my Canon pixma printer
+sane
+
 flatpak  # as a backup package manager
 
 # Console workflow tools
