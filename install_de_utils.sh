@@ -27,6 +27,9 @@ if ! grep -q "$brew_init" /etc/profile.d/*; then
   sudo mv linuxbrew.sh /etc/profile.d/
 fi
 
+printf "\nSetting up TLP\n\n"
+sudo ln -sf /etc/sv/tlp /var/service
+
 printf "\nSetting up CUPS\n\n"
 sudo touch /etc/sv/cupsd/down # I dont want it to start at boot
 sudo ln -sf /etc/sv/cupsd /var/service
