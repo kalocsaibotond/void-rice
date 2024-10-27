@@ -62,7 +62,7 @@ if ! grep -q "$set_env" /etc/profile.d/*; then
 fi
 
 # Source POSIX shell configuration in bashrc
-source_env='. $ENV'
+source_env='[ -f "$ENV" ] && . $ENV'
 sudo mkdir -p /etc/bash/bashrc.d/
 if ! grep -q "$source_env" /etc/bash/bashrc.d/*; then
   echo "$source_env" >00-source_env.sh
