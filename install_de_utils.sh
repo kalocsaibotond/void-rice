@@ -22,7 +22,7 @@ sudo flatpak remote-add --if-not-exists flathub \
 printf "\nSetting up Linuxbrew\n\n"
 brew_init='eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
 if ! grep -q "$brew_init" /etc/profile.d/*; then
-  echo "$brew_init" >linuxbrew.sh
+  echo "$brew_init" >linuxbrew_init.sh
   chmod o+rx linuxbrew.sh
   sudo mv linuxbrew.sh /etc/profile.d/
 fi
@@ -35,9 +35,18 @@ sudo touch /etc/sv/cupsd/down # I dont want it to start at boot
 sudo ln -sf /etc/sv/cupsd /var/service
 
 printf "\nSetting up Zoxide\n\n"
-zoxide_init='eval "$(zoxide init posix --hook prompt)"'
+zoxide_init='
+shell_name=$(ps -p $$ -o comm=)
+case $shell_name in
+"zsh") eval "$(zoxide init zsh --hook prompt)" ;;
+"bash") eval "$(zoxide init bash --hook prompt)" ;;
+"ksh") eval "$(zoxide init ksh --hook prompt)" ;;
+"mksh") eval "$(zoxide init ksh --hook prompt)" ;;
+"oksh") eval "$(zoxide init ksh --hook prompt)" ;;
+*) eval "$(zoxide init posix --hook prompt)" ;;
+asec'
 if ! grep -q "$zoxide_init" /etc/shrc.d/*; then
-  echo "$zoxide_init" >zoxide.sh
+  echo "$zoxide_init" >zoxide_init.sh
   chmod o+rx zoxide.sh
   sudo mv zoxide.sh /etc/shrc.d/
 fi
