@@ -36,8 +36,7 @@ sudo ln -sf /etc/sv/cupsd /var/service
 
 printf "\nSetting up Zoxide\n\n"
 zoxide_init='
-shell_name=$(ps -p $$ -o comm=)
-case $shell_name in
+case $SHELL_NAME in
 "zsh") eval "$(zoxide init zsh --hook prompt)" ;;
 "bash") eval "$(zoxide init bash --hook prompt)" ;;
 "ksh") eval "$(zoxide init ksh --hook prompt)" ;;

@@ -53,6 +53,13 @@ if ! [ -f /etc/shrc ] || ! grep -q "$sys_shrc" /etc/shrc; then
 fi
 sudo mkdir -p /etc/shrc.d
 
+set_shell_name='export SHELL_NAME=$(ps -p $$ -o comm=)'
+if ! grep -q "$set_shell_name" /etc/shrc.d/*; then
+  echo "$set_shell_name" >00-set_shell_name.sh
+  chmod o+rx 00-set_shell_name.sh
+  sudo mv 00-set_shell_name.sh /etc/shrc.d/
+fi
+
 set_env='export ENV=/etc/shrc'
 sudo mkdir -p /etc/profile.d/
 if ! grep -q "$set_env" /etc/profile.d/*; then
