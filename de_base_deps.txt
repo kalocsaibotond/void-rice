@@ -1,6 +1,6 @@
 # Build dependencies
 base-devel
-libX11-devel  # For st
+libX11-devel  # For st, slstatus
 libXft-devel  # For dwm, st
 libXinerama-devel  # For dwm
 webkit2gtk-devel  # For surf

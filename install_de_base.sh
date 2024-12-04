@@ -23,6 +23,7 @@ sudo touch /etc/sv/gpm/down # I dont want it to start at boot
 sudo ln -sf /etc/sv/gpm /var/service
 
 ./install_dwm.sh $1
+./install_slstatus.sh $1
 ./install_st.sh $1
 ./install_devour.sh $1
 ./install_tabbed.sh $1

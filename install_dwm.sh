@@ -6,15 +6,17 @@ cd dwm
 sudo git checkout -b my_dwm
 
 printf "\nConfiguring dwm\n\n"
+sudo cp config.def.h config.h
+
 # Set win key as mod
 sudo sed -i 's/^#define MODKEY Mod1Mask$/#define MODKEY Mod4Mask/' \
-  ./config.def.h
+  ./config.h
 # Eliminating all window rules.
-sudo sed -i '/Gimp/d' ./config.def.h
+sudo sed -i '/Gimp/d' ./config.h
 sudo sed -i 's/{ "Firefox.*/{ NULL,       NULL,       NULL,'$(
-)'       0,            False,       -1 },/' ./config.def.h
+)'       0,            False,       -1 },/' ./config.h
 
-sudo git add ./config.def.h
+sudo git add ./config.h
 sudo git commit -m "feat: setup my base dwm version"
 sudo make
 sudo make clean install
