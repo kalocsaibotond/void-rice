@@ -14,7 +14,6 @@ xorg-fonts  # Without it a lot of symbols would miss
 xorg-apps
 xclip
 dmenu
-slstatus
 
 sxiv
 fim
