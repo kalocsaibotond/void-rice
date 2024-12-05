@@ -42,24 +42,24 @@ printf "\nConfiguring patches\n\n"
 sudo cp config.def.h config.h
 
 printf "\nConfiguring font2 patch:\n\n"
-sudo sed -i 's/Liberation Mono[^"]\+/'$(
+sudo sed 's/Liberation Mono[^"]\+/'$(
 )'OpenDyslexicMono:pixelsize=12:antialias=true:autohint=true/' \
-  config.h
-sudo sed -i 's/^.\+Inconsolata for Powerline.\+$/'$(
+  config.h >config.h
+sudo sed 's/^.\+Inconsolata for Powerline.\+$/'$(
 )'\t"Noto Color Emoji:pixelsize=12:antialias=true:autohint=true",/' \
-  config.h
-sudo sed -i 's/^.\+Hack Nerd Font Mono.\+$/'$(
+  config.h >config.h
+sudo sed 's/^.\+Hack Nerd Font Mono.\+$/'$(
 )'\t"Symbols Nerd Font Mono:pixelsize=12:antialias=true:autohint=true",/' \
-  config.h
+  config.h >config.h
 
 printf "\nConfiguring local charpropoffsets patch:\n\n"
-sudo sed -i 's/chscale = 1\.0/chscale = 3.0 \/ 2.0/' config.h
-sudo sed -i 's/cypropoffset = 0/cypropoffset = 1.0 \/ 3.0/' config.h
+sudo sed 's/chscale = 1\.0/chscale = 3.0 \/ 2.0/' config.h >config.h
+sudo sed 's/cypropoffset = 0/cypropoffset = 1.0 \/ 3.0/' config.h >config.h
 
 printf "\nConfiguring boxdraw patch:\n\n"
-sudo sed -i 's/boxdraw = 0/boxdraw = 1/' config.h
-sudo sed -i 's/boxdraw_bold = 0/boxdraw_bold = 1/' config.h
-sudo sed -i 's/boxdraw_braille = 0/boxdraw_braille = 1/' config.h
+sudo sed 's/boxdraw = 0/boxdraw = 1/' config.h >config.h
+sudo sed 's/boxdraw_bold = 0/boxdraw_bold = 1/' config.h >config.h
+sudo sed 's/boxdraw_braille = 0/boxdraw_braille = 1/' config.h >config.h
 
 sudo git add -A
 sudo git commit -m "feat: setup my base st version"

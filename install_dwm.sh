@@ -12,9 +12,8 @@ sudo cp config.def.h config.h
 sudo sed -i 's/^#define MODKEY Mod1Mask$/#define MODKEY Mod4Mask/' \
   ./config.h
 # Eliminating all window rules.
-sudo sed -i '/Gimp/d' ./config.h
-sudo sed -i 's/{ "Firefox.*/{ NULL,       NULL,       NULL,'$(
-)'       0,            False,       -1 },/' ./config.h
+sudo sed -e '/Gimp/d' -e 's/{ "Firefox.*/{ NULL,       NULL,       NULL,'$(
+)'       0,            False,       -1 },/' ./config.h >./config.h
 
 sudo git add ./config.h
 sudo git commit -m "feat: setup my base dwm version"
