@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 printf "\nInstalling devour\n\n"
 sudo GIT_SSL_NO_VERIFY=$1 git clone https://github.com/salman-abedin/devour

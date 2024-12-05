@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 printf "\nUpdating The system:\n\n"
 sudo SSL_NO_VERIFY_PEER=$1 xbps-install -Syy

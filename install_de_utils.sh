@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Installing other utilites of my desktop environment
 printf "\nLastly installing the utilites of my desktop environment:\n\n"

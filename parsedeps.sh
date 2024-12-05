@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 deps=""
 for argument in $@; do
