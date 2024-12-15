@@ -16,5 +16,4 @@ sudo git apply patches/devour-shellalias-20241215-3184e2a.diff
 
 sudo git add -A
 sudo git commit -m "feat: setup my base devour version"
-sudo make
-sudo make clean install
+sudo make install
