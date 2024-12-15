@@ -5,7 +5,16 @@ sudo GIT_SSL_NO_VERIFY=$1 git clone https://github.com/salman-abedin/devour
 cd devour
 sudo git checkout -b my_devour
 
-printf "\nApplying shellalias patch:\n\n"
-sudo patch -s <devour-shellalias-10.0.diff
+printf "\nFetch local shellalias patch:\n\n"
+sudo mkdir patches
+cd patches
+sudo cp ../../local_patches/devour/shellalias/devour-shellalias-20241215-3184e2a.diff .
+cd ..
 
-sudo make install
+printf "\nApplying local shellalias patch:\n\n"
+sudo git apply patches/devour-shellalias-20241215-3184e2a.diff
+
+sudo git add -A
+sudo git commit -m "feat: setup my base devour version"
+sudo make
+sudo make clean install

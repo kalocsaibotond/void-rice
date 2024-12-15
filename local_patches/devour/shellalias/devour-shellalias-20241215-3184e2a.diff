@@ -1,0 +1,32 @@
+From 063fda8307e42fffb871bd101b3af8f887412906 Mon Sep 17 00:00:00 2001
+From: Botond Kalocsai <kalocsaibotond@gmail.com>
+Date: Sun, 15 Dec 2024 12:59:23 +0100
+Subject: [PATCH] feat: add shell alias support
+
+---
+ devour.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/devour.c b/devour.c
+index 39d7907..3d9f381 100644
+--- a/devour.c
++++ b/devour.c
+@@ -14,6 +14,7 @@ void run_command(char **argv) {
+   char *arg;
+   char cmd[1024] = {0};
+ 
++  strcat(cmd, "$SHELL -i -c '");
+   while ((arg = *++argv)) {
+     while ((arg_char = *arg++)) {
+       if (strchr(UNSAFE_CHARS, arg_char))
+@@ -22,6 +23,7 @@ void run_command(char **argv) {
+     }
+     strcat(cmd, " ");
+   }
++  strcat(cmd, "> /dev/null 2>&1; exit'");
+   system(cmd);
+ }
+ 
+-- 
+2.47.1.windows.1
+
