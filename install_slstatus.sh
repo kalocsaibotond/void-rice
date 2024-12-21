@@ -8,10 +8,15 @@ sudo git checkout -b my_slstatus
 printf "\nConfiguring slstatus\n\n"
 sudo cp config.def.h config.h
 
-sudo sed "s/\\([^{]\\+\\){ datetime,.\\+/"$(
-)"\\1{ battery_perc, \"bat: %s\",\\t\"BAT0\" },"$(
-)"\\n\\1{ keymap, \" kb: %s\",\\tNULL },"$(
-)"\\n\\1{ datetime, \" %s\",\\t\"%F %T\" },/" config.h >config.h
+echo "set number
+/function format
++
+c
+\t{ battery_perc, \"bat: %s,\",   \"BAT0\" },
+\t{ keymap, \" kb: %s,\",         NULL },
+\t{ datetime, \" %s\",            \"%F %T\" },
+.
+x" | sudo ex config.h
 
 sudo git add ./config.h
 sudo git commit -m "feat: setup my base slstatus version"
