@@ -38,19 +38,19 @@ sudo patch -p1 <patches/surf-searchengines-20220804-609ea1c.diff
 printf "\nConfiguring patches\n\n"
 sudo cp config.def.h config.h
 
-printf "\nConfiguring searchengines patch\n\n"
-sudo sed 's/^\(.*\){ " ", "https[^"]\+" },/'$(
-)'\1{ " ", "https:\/\/google.com\/search?q=%s" },/' \
-  config.h >config.h
-sudo sed 's/^\(.*\){ "osrs ", "https[^"]\+" },/'$(
-)'\1{ "w ", "https:\/\/wikipedia.org\/wiki\/%s" },\n'$(
-)'\1{ "d ", "https:\/\/dictzone.com\/angol-magyar-szotar\/%s" },\n'$(
-)'\1{ "de ", "https:\/\/dictzone.com\/magyar-angol-szotar\/%s" },\n'$(
-)'\1{ "y ", "https:\/\/youtube.com\/results?search_query=%s" },/' \
-  config.h >config.h
-
-printf "\nConfiguring startgo patch\n\n"
-sudo sed -i 's/startgo = 0/startgo = 1/' config.h
+echo 'set number
+/startgo =
+.,. s/=[^=]\{1,\};/= 1;/
+/searchengines\[\] =
++
+.,/};/- change
+	{ " ", "https://google.com/search?q=%s" },
+	{ "w ", "https://wikipedia.org/wiki/%s" },
+	{ "d ", "https://dictzone.com/angol-magyar-szotar/%s" },
+	{ "de ", "https://dictzone.com/magyar-angol-szotar/%s" },
+	{ "y ", "https://youtube.com/results?search_query=%s" },
+.
+xit' | sudo ex config.h
 
 ln -sf $(pwd)/surf-open.sh /usr/local/bin/tsurf
 
