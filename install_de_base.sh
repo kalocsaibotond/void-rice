@@ -37,7 +37,9 @@ if ! grep -q "$suckless_xinitrc" /etc/X11/xinit/xinitrc.d/*; then
   sudo mkdir -p /etc/X11/xinit/xinitrc.d/
   sudo mv 99-suckless-xinitrc.sh /etc/X11/xinit/xinitrc.d/
 fi
-sudo sed -z -i 's/twm.*//' /etc/X11/xinit/xinitrc # Cleaning global xinitrc up
+echo 'set number
+/twm/,$ delete
+xit' | sudo ex /etc/X11/xinit/xinitrc # Cleaning global xinitrc up
 
 printf "\nSetting up POSIX shell system-wide config into /etc/shrc .\n\n"
 sys_shrc='for f in /etc/shrc.d/*.sh; do [ -r $f ] && . $f; done; unset f'
