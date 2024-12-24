@@ -48,8 +48,8 @@ echo 'set number
 /font2\[\] =
 +
 .,/};/- change
-	"Noto Color Emoji:pixelsize=12:antialias=true:autohint=true"
-	"Symbols Nerd Font Mono:pixelsize=12:antialias=true:autohint=true"
+	"Noto Color Emoji:pixelsize=12:antialias=true:autohint=true",
+	"Symbols Nerd Font Mono:pixelsize=12:antialias=true:autohint=true",
 .
 /chscale =
 .,. s/=[^=]\{1,\};/= 3.0 \/ 2.0;/
