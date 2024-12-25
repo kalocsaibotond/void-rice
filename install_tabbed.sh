@@ -2,8 +2,8 @@
 
 printf "\nInstalling tabbed\n\n"
 sudo GIT_SSL_NO_VERIFY=$1 git clone https://git.suckless.org/tabbed
-cd tabbed
-sudo git checkout -b my_tabbed
+cd tabbed || return 1
+sudo git checkout -b my_tabbed || return 1
 
 printf "\nDownloading patches:\n\n"
 sudo mkdir patches

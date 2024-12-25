@@ -2,8 +2,8 @@
 
 printf "\nInstalling devour\n\n"
 sudo GIT_SSL_NO_VERIFY=$1 git clone https://github.com/salman-abedin/devour
-cd devour
-sudo git checkout -b my_devour
+cd devour || return 1
+sudo git checkout -b my_devour || return 1
 
 printf "\nFetch local shellalias patch:\n\n"
 sudo mkdir patches

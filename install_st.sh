@@ -2,8 +2,8 @@
 
 printf "\nInstalling st\n\n"
 sudo GIT_SSL_NO_VERIFY=$1 git clone https://git.suckless.org/st
-cd st
-sudo git checkout -b my_st
+cd st || return 1
+sudo git checkout -b my_st || return 1
 
 printf "\nDownloading patches:\n\n"
 sudo mkdir patches

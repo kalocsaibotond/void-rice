@@ -2,8 +2,8 @@
 
 printf "\nInstalling surf\n\n"
 sudo GIT_SSL_NO_VERIFY=$1 git clone https://git.suckless.org/surf
-cd surf
-sudo git checkout -b my_surf
+cd surf || return 1
+sudo git checkout -b my_surf || return 1
 
 printf "\nDownloading patches:\n\n"
 sudo mkdir patches

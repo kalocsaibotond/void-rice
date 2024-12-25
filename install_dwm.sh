@@ -2,8 +2,8 @@
 
 printf "\nInstalling dwm\n\n"
 sudo GIT_SSL_NO_VERIFY=$1 git clone https://git.suckless.org/dwm
-cd dwm
-sudo git checkout -b my_dwm
+cd dwm || return 1
+sudo git checkout -b my_dwm || return 1
 
 printf "\nConfiguring dwm\n\n"
 sudo cp config.def.h config.h
