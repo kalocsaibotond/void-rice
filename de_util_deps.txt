@@ -44,7 +44,7 @@ mupdf-tools
 ffmpeg
 
 ctags
-tree-sitter
+tree-sitter-devel
 neovim
 
 # Network management
