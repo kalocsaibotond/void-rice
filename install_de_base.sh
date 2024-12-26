@@ -1,12 +1,19 @@
 #!/bin/sh
 
+if [ "$1" ]; then
+  export SSL_NO_VERIFY_PEER=true
+  env_vars='--preserve-env=SSL_NO_VERIFY_PEER'
+else
+  env_vars=''
+fi
+
 printf "\nUpdating The system:\n\n"
-sudo SSL_NO_VERIFY_PEER=$1 xbps-install -Syy
-sudo SSL_NO_VERIFY_PEER=$1 xbps-install -u xbps
-sudo SSL_NO_VERIFY_PEER=$1 xbps-install -Syu
+sudo $env_vars xbps-install -Syy
+sudo $env_vars xbps-install -u xbps
+sudo $env_vars xbps-install -Syu
 
 printf "\nInstalling base desktop environment dependencies:\n\n"
-sudo SSL_NO_VERIFY_PEER=$1 xbps-install -Sy $(./parsedeps.sh de_base_deps.txt)
+sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_base_deps.txt)
 
 printf "\nConfiguring fontconfig:\n\n"
 sudo ln -sf /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf \
@@ -53,7 +60,13 @@ xit' | sudo ex /etc/X11/xinit/xinitrc # Cleaning global xinitrc up
 
 printf "\nSetting up POSIX shell system-wide config into /etc/shrc .\n\n"
 
-sys_shrc='if [ -d /etc/shrc.d ]; then
+sys_shrc='# Only apply in interactive shell sessions
+case $- in
+*i*) ;; # Interactive shell session
+*) return ;;
+esac
+
+if [ -d /etc/shrc.d ]; then
   for f in /etc/shrc.d/*.sh; do
     [ -r "$f" ] && . "$f"
   done
@@ -75,24 +88,24 @@ sudo mkdir -p /etc/shrc.d
 
 set_shell_name='export SHELL_NAME=$(ps -p $$ -o comm=)'
 if ! grep -q "$set_shell_name" /etc/shrc.d/*; then
-  echo "$set_shell_name" >00-set_shell_name.sh
-  chmod o+rx 00-set_shell_name.sh
-  sudo mv 00-set_shell_name.sh /etc/shrc.d/
+  echo "$set_shell_name" >00-set-shell-name.sh
+  chmod o+rx 00-set-shell-name.sh
+  sudo mv 00-set-shell-name.sh /etc/shrc.d/
 fi
 
 set_env='export ENV=/etc/shrc'
 sudo mkdir -p /etc/profile.d/
 if ! grep -q "$set_env" /etc/profile.d/*; then
-  echo "$set_env" >00-set_env.sh
-  chmod o+rx 00-set_env.sh
-  sudo mv 00-set_env.sh /etc/profile.d/
+  echo "$set_env" >00-set-env.sh
+  chmod o+rx 00-set-env.sh
+  sudo mv 00-set-env.sh /etc/profile.d/
 fi
 
 # Source POSIX shell configuration in bashrc
 source_env='[ -f "$ENV" ] && . $ENV'
 sudo mkdir -p /etc/bash/bashrc.d/
 if ! grep -q "$source_env" /etc/bash/bashrc.d/*; then
-  echo "$source_env" >00-source_env.sh
-  chmod o+rx 00-source_env.sh
-  sudo mv 00-source_env.sh /etc/bash/bashrc.d/
+  echo "$source_env" >00-source-env.sh
+  chmod o+rx 00-source-env.sh
+  sudo mv 00-source-env.sh /etc/bash/bashrc.d/
 fi

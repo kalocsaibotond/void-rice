@@ -1,28 +1,29 @@
 #!/bin/sh
 
+if [ "$1" ]; then
+  export GIT_SSL_NO_VERIFY=true
+  export WGETRC="$(pwd)/.wgetrc"
+  env_vars='--preserve-env=GIT_SSL_NO_VERIFY,WGETRC'
+else
+  env_vars=''
+fi
+
 printf "\nInstalling surf\n\n"
-sudo GIT_SSL_NO_VERIFY=$1 git clone https://git.suckless.org/surf
+sudo $env_vars git clone https://git.suckless.org/surf
 cd surf || return 1
 sudo git checkout -b my_surf || return 1
 
 printf "\nDownloading patches:\n\n"
 sudo mkdir patches
 cd patches
-if [ true = "$1" ]; then # Downloading patches without SSL check
-  sudo wget --no-check-certificate \
-    https://surf.suckless.org/patches/modal/surf-modal-20190209-d068a38.diff
-  sudo wget --no-check-certificate \
-    https://surf.suckless.org/patches/clipboard-instead-of-primary/surf-clipboard-20200112-a6a8878.diff
-  sudo wget --no-check-certificate \
-    https://surf.suckless.org/patches/startgo/surf-startgo-20200913-d068a38.diff
-  sudo wget --no-check-certificate \
-    https://surf.suckless.org/patches/searchengines/surf-searchengines-20220804-609ea1c.diff
-else
-  sudo wget https://surf.suckless.org/patches/modal/surf-modal-20190209-d068a38.diff
-  sudo wget https://surf.suckless.org/patches/clipboard-instead-of-primary/surf-clipboard-20200112-a6a8878.diff
-  sudo wget https://surf.suckless.org/patches/startgo/surf-startgo-20200913-d068a38.diff
-  sudo wget https://surf.suckless.org/patches/searchengines/surf-searchengines-20220804-609ea1c.diff
-fi
+sudo $env_vars wget \
+  https://surf.suckless.org/patches/modal/surf-modal-20190209-d068a38.diff
+sudo $env_vars wget \
+  https://surf.suckless.org/patches/clipboard-instead-of-primary/surf-clipboard-20200112-a6a8878.diff
+sudo $env_vars wget \
+  https://surf.suckless.org/patches/startgo/surf-startgo-20200913-d068a38.diff
+sudo $env_vars wget \
+  https://surf.suckless.org/patches/searchengines/surf-searchengines-20220804-609ea1c.diff
 cd ..
 
 printf "\nApplying patches\n\n"

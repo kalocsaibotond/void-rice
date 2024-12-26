@@ -1,7 +1,14 @@
 #!/bin/sh
 
+if [ "$1" ]; then
+  export GIT_SSL_NO_VERIFY=true
+  env_vars='--preserve-env=GIT_SSL_NO_VERIFY'
+else
+  env_vars=''
+fi
+
 printf "\nInstalling slstatus\n\n"
-sudo GIT_SSL_NO_VERIFY=$1 git clone https://git.suckless.org/slstatus
+sudo $env_vars git clone https://git.suckless.org/slstatus
 cd slstatus || return 1
 sudo git checkout -b my_slstatus || return 1
 

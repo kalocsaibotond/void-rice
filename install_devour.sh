@@ -1,7 +1,14 @@
 #!/bin/sh
 
+if [ "$1" ]; then
+  export GIT_SSL_NO_VERIFY=true
+  env_vars='--preserve-env=GIT_SSL_NO_VERIFY'
+else
+  env_vars=''
+fi
+
 printf "\nInstalling devour\n\n"
-sudo GIT_SSL_NO_VERIFY=$1 git clone https://github.com/salman-abedin/devour
+sudo $env_vars git clone https://github.com/salman-abedin/devour
 cd devour || return 1
 sudo git checkout -b my_devour || return 1
 

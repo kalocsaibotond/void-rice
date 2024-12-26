@@ -1,23 +1,28 @@
 #!/bin/sh
 
+if [ "$1" ]; then
+  export SSL_NO_VERIFY_PEER=true
+  export GIT_SSL_NO_VERIFY=true
+  export WGETRC="$(pwd)/.wgetrc"
+  export CURL_HOME="$(pwd)"
+  env_vars= \
+    '--preserve-env=SSL_NO_VERIFY_PEER,GIT_SSL_NO_VERIFY,WGETRC,CURL_HOME'
+else
+  env_vars=''
+fi
+
 # Installing other utilites of my desktop environment
 printf "\nLastly installing the utilites of my desktop environment:\n\n"
-sudo SSL_NO_VERIFY_PEER=$1 xbps-install -Sy $(./parsedeps.sh de_util_deps.txt)
+sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_util_deps.txt)
 
 # Backup package managers.
 printf "\nInstalling Linuxbrew\n\n"
 mkdir -p $HOME/.cache/Homebrew
-if [ true = "$1" ]; then # Downloading patches without SSL check
-  NONINTERACTIVE=1 bash -c \
-    "$(wget --no-check-certificate -O \
-      - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
-else
-  NONINTERACTIVE=1 bash -c \
-    "$(wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
-fi
+NONINTERACTIVE=1 bash -c \
+  "$(wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 printf "\nSetting up flatpak (needs reboot to work)\n\n"
-sudo flatpak remote-add --if-not-exists flathub \
+sudo $env_vars flatpak remote-add --if-not-exists flathub \
   https://flathub.org/repo/flathub.flatpakrepo
 
 printf "\nSetting up Linuxbrew\n\n"

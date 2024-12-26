@@ -1,19 +1,23 @@
 #!/bin/sh
 
+if [ "$1" ]; then
+  export GIT_SSL_NO_VERIFY=true
+  export WGETRC="$(pwd)/.wgetrc"
+  env_vars='--preserve-env=GIT_SSL_NO_VERIFY,WGETRC'
+else
+  env_vars=''
+fi
+
 printf "\nInstalling tabbed\n\n"
-sudo GIT_SSL_NO_VERIFY=$1 git clone https://git.suckless.org/tabbed
+sudo $env_vars git clone https://git.suckless.org/tabbed
 cd tabbed || return 1
 sudo git checkout -b my_tabbed || return 1
 
 printf "\nDownloading patches:\n\n"
 sudo mkdir patches
 cd patches
-if [ true = "$1" ]; then # Downloading patches without SSL check
-  sudo wget --no-check-certificate \
-    https://tools.suckless.org/tabbed/patches/clientnumber/tabbed-clientnumber-0.6.diff
-else
-  sudo wget https://tools.suckless.org/tabbed/patches/clientnumber/tabbed-clientnumber-0.6.diff
-fi
+sudo $env_vars wget \
+  https://tools.suckless.org/tabbed/patches/clientnumber/tabbed-clientnumber-0.6.diff
 cd ..
 
 printf "\nApplying patches\n\n"
