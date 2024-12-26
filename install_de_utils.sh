@@ -6,12 +6,13 @@ sudo SSL_NO_VERIFY_PEER=$1 xbps-install -Sy $(./parsedeps.sh de_util_deps.txt)
 
 # Backup package managers.
 printf "\nInstalling Linuxbrew\n\n"
+mkdir -p $HOME/.cache/Homebrew
 if [ true = "$1" ]; then # Downloading patches without SSL check
-  bash -c \
+  NONINTERACTIVE=1 bash -c \
     "$(wget --no-check-certificate -O \
       - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
 else
-  bash -c \
+  NONINTERACTIVE=1 bash -c \
     "$(wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" </dev/null
 fi
 
