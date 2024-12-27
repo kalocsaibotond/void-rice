@@ -15,6 +15,14 @@ sudo $env_vars xbps-install -Syu
 printf "\nInstalling base desktop environment dependencies:\n\n"
 sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_base_deps.txt)
 
+sudo ln -sf $(xbps-query -f w3m-img | grep w3mimgdisplay) \
+  /usr/local/bin/w3mimgdisplay
+
+printf "\nConfiguring gpm to not start at boot:\n\n"
+# Configuring gpm
+sudo touch /etc/sv/gpm/down # I dont want it to start at boot
+sudo ln -sf /etc/sv/gpm /var/service
+
 printf "\nConfiguring fontconfig:\n\n"
 sudo ln -sf /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf \
   /etc/fonts/conf.d/
@@ -23,11 +31,6 @@ sudo xbps-reconfigure -f fontconfig
 printf "\nConfiguring git:\n\n"
 sudo git config --global user.email "kalocsaibotond@gmail.com"
 sudo git config --global user.name "Botond Kalocsai"
-
-printf "\nConfiguring gpm to not start at boot:\n\n"
-# Configuring gpm
-sudo touch /etc/sv/gpm/down # I dont want it to start at boot
-sudo ln -sf /etc/sv/gpm /var/service
 
 ./install_dwm.sh $1
 ./install_slstatus.sh $1

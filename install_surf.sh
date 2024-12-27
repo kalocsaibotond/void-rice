@@ -53,7 +53,7 @@ echo 'set number
 .
 xit' | sudo ex config.h
 
-ln -sf $(pwd)/surf-open.sh /usr/local/bin/tsurf
+sudo ln -sf $(pwd)/surf-open.sh /usr/local/bin/tsurf
 
 sudo git add -A
 sudo git commit -m "feat: setup my base surf version"
