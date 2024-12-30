@@ -8,7 +8,7 @@ else
 fi
 
 printf "\nInstalling devour\n\n"
-sudo $env_vars git clone https://github.com/salman-abedin/devour
+sudo $env_vars git clone https://github.com/salman-abedin/devour.git
 cd devour || return 1
 sudo git checkout -b my_devour || return 1
 

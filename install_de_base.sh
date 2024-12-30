@@ -35,6 +35,7 @@ sudo git config --global user.name "Botond Kalocsai"
 ./install_dwm.sh $1
 ./install_slstatus.sh $1
 ./install_st.sh $1
+./install_sfm.sh $1
 ./install_devour.sh $1
 ./install_tabbed.sh $1
 ./install_surf.sh $1
