@@ -12,6 +12,15 @@ sudo $env_vars git clone https://github.com/afify/sfm.git
 cd sfm || return 1
 sudo git checkout -b my_sfm || return 1
 
+printf "\nFetch local autojump patch:\n\n"
+sudo mkdir patches
+cd patches
+sudo cp ../../local_patches/sfm/autojump/sfm-autojump-20250104-db66dd0.diff .
+cd ..
+
+printf "\nApplying local autojump patch:\n\n"
+sudo git apply patches/sfm-autojump-20250104-db66dd0.diff
+
 printf "\nConfiguring sfm\n\n"
 sudo cp config.def.h config.h
 
