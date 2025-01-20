@@ -1,0 +1,615 @@
+From ccdbb4168c056b36b88c5af953383bf011a3eec9 Mon Sep 17 00:00:00 2001
+From: Botond Kalocsai <kalocsaibotond@gmail.com>
+Date: Wed, 15 Jan 2025 21:36:47 +0100
+Subject: [PATCH 1/4] [feat] centralise all cursor motion to move_cursor, make
+ visual mod vi like
+
+---
+ sfm.c | 76 +++++++++++++++++++++++++++++++++--------------------------
+ sfm.h |  1 +
+ 2 files changed, 43 insertions(+), 34 deletions(-)
+
+diff --git a/sfm.c b/sfm.c
+index 8628d00..9f32f6c 100644
+--- a/sfm.c
++++ b/sfm.c
+@@ -1179,12 +1179,8 @@ delete_entry(const Arg *arg)
+ static void
+ move_bottom(const Arg *arg)
+ {
+-	current_pane->current_index = current_pane->entry_count - 1;
+-	current_pane->start_index = current_pane->entry_count - (term.rows - 2);
+-	if (current_pane->start_index < 0) {
+-		current_pane->start_index = 0;
+-	}
+-	update_screen();
++	move_cursor(&(Arg) { .i = current_pane->entry_count -
++			current_pane->current_index - 1 });
+ }
+ 
+ static void
+@@ -1222,6 +1218,31 @@ update_entry(Pane *pane, int index)
+ 	write(STDOUT_FILENO, buffer, strlen(buffer));
+ }
+ 
++static void
++render_cursor_move(const int new_start_index, const int old_index)
++{
++	if (new_start_index != current_pane->start_index) {
++		update_screen();
++		return;
++	}
++	// Update only the necessary entries
++	if (old_index == current_pane->current_index)
++		return;
++	if (mode == VisualMode) {
++		if(old_index < current_pane->current_index)
++			for (int i = old_index;
++				i <= current_pane->current_index; i++)
++				update_entry(current_pane, i);
++		else
++			for (int i = old_index;
++				i >= current_pane->current_index; i--)
++				update_entry(current_pane, i);
++	} else {
++		update_entry(current_pane, old_index);
++		update_entry(current_pane, current_pane->current_index);
++	}
++}
++
+ static void
+ move_cursor(const Arg *arg)
+ {
+@@ -1249,26 +1270,23 @@ move_cursor(const Arg *arg)
+ 			current_pane->current_index - (term.rows - 3);
+ 	}
+ 
+-	if (new_start_index != current_pane->start_index) {
+-		update_screen();
+-	} else {
+-		// Update only the necessary entries
+-		if (old_index != current_pane->current_index) {
+-			update_entry(current_pane, old_index);
+-			update_entry(current_pane, current_pane->current_index);
+-		}
++	if (mode == VisualMode){
++		if(old_index < current_pane->current_index)
++			for (int i = old_index + 1;
++				i <= current_pane->current_index; i++)
++				select_entry(&current_pane->entries[i], Select);
++		else if(old_index > current_pane->current_index)
++			for (int i = old_index - 1;
++				i >= current_pane->current_index; i--)
++				select_entry(&current_pane->entries[i], Select);
+ 	}
+-
+-	if (mode == VisualMode)
+-		select_cur_entry(&(Arg) { .i = Select });
++	render_cursor_move(new_start_index, old_index);
+ }
+ 
+ static void
+ move_top(const Arg *arg)
+ {
+-	current_pane->current_index = 0;
+-	current_pane->start_index = 0;
+-	update_screen();
++	move_cursor(&(Arg) { .i = -current_pane->current_index });
+ }
+ 
+ static void
+@@ -1828,20 +1846,10 @@ move_to_match(const Arg *arg)
+ 			current_pane->matched_count;
+ 	}
+ 
+-	current_pane->current_index =
+-		current_pane->matched_indices[current_pane->current_match];
+-
+-	if (current_pane->current_index < current_pane->start_index ||
+-		current_pane->current_index >=
+-			current_pane->start_index + term.rows - 2) {
+-		current_pane->start_index =
+-			current_pane->current_index - (term.rows - 2) / 2;
+-		if (current_pane->start_index < 0) {
+-			current_pane->start_index = 0;
+-		}
+-	}
+-
+-	update_screen();
++	move_cursor(&(Arg) {
++		.i = current_pane
++				->matched_indices[current_pane->current_match] -
++			current_pane->current_index });
+ }
+ 
+ int
+diff --git a/sfm.h b/sfm.h
+index f38767c..5de5673 100644
+--- a/sfm.h
++++ b/sfm.h
+@@ -199,6 +199,7 @@ static void create_new_dir(const Arg *);
+ static void copy_entries(const Arg *);
+ static void delete_entry(const Arg *);
+ static void move_bottom(const Arg *);
++static void render_cursor_move(const int, const int);
+ static void move_cursor(const Arg *);
+ static void move_top(const Arg *);
+ static void move_entries(const Arg *);
+-- 
+2.47.1.windows.2
+
+
+From 1b1da9b8e5c807b1ae647b5930b8fda67cfffab5 Mon Sep 17 00:00:00 2001
+From: Botond Kalocsai <kalocsaibotond@gmail.com>
+Date: Thu, 16 Jan 2025 13:23:02 +0100
+Subject: [PATCH 2/4] [feat] add half and full pane scroll
+
+---
+ config.def.h |  8 ++++----
+ sfm.1        | 10 ++++++++--
+ sfm.c        | 19 +++++++++++++++++++
+ sfm.h        |  2 ++
+ 4 files changed, 33 insertions(+), 6 deletions(-)
+
+diff --git a/config.def.h b/config.def.h
+index a955194..90da233 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -92,10 +92,10 @@ static Key nkeys[] = {
+ 	{ XK_DOWN,             move_cursor,      { .i = +1 }              },
+ 	{ 'k',                 move_cursor,      { .i = -1 }              },
+ 	{ XK_UP,               move_cursor,      { .i = -1 }              },
+-	{ XK_CTRL('u'),        move_cursor,      { .i = -5 }              },
+-	{ XK_CTRL('d'),        move_cursor,      { .i = +5 }              },
+-	{ '{',                 move_cursor,      { .i = -10 }             },
+-	{ '}',                 move_cursor,      { .i = +10 }             },
++	{ XK_CTRL('u'),        move_half_pane,   { .i = -1 }              },
++	{ XK_CTRL('d'),        move_half_pane,   { .i = +1 }              },
++	{ '{',                 move_full_pane,   { .i = -1 }              },
++	{ '}',                 move_full_pane,   { .i = +1 }              },
+ 	{ 'l',                 open_entry,       { 0 }                    },
+ 	{ 'h',                 cd_to_parent,     { 0 }                    },
+ 	{ 'q',                 quit,             { 0 }                    },
+diff --git a/sfm.1 b/sfm.1
+index 91dd025..0709831 100644
+--- a/sfm.1
++++ b/sfm.1
+@@ -37,10 +37,16 @@ top
+ bottom
+ .TP
+ .B ctrl+u
+-scroll up
++scroll up half pane
+ .TP
+ .B ctrl+d
+-scroll down
++scroll down half pane
++.TP
++.B {
++scroll up full pane
++.TP
++.B }
++scroll down full pane
+ .TP
+ .B ctrl+f
+ create new file
+diff --git a/sfm.c b/sfm.c
+index 9f32f6c..f5f0e07 100644
+--- a/sfm.c
++++ b/sfm.c
+@@ -1283,6 +1283,25 @@ move_cursor(const Arg *arg)
+ 	render_cursor_move(new_start_index, old_index);
+ }
+ 
++static void
++move_half_pane(const Arg *arg)
++{
++	if(0 < arg->i)
++		move_cursor(&(Arg) { .i = (term.rows - 2) / 2 });
++	else
++		move_cursor(&(Arg) { .i = -(term.rows - 2) / 2 });
++}
++
++static void
++move_full_pane(const Arg *arg)
++{
++	if(0 < arg->i)
++		move_cursor(&(Arg) { .i = (term.rows - 2) });
++	else
++		move_cursor(&(Arg) { .i = -(term.rows - 2) });
++}
++
++
+ static void
+ move_top(const Arg *arg)
+ {
+diff --git a/sfm.h b/sfm.h
+index 5de5673..6acc42b 100644
+--- a/sfm.h
++++ b/sfm.h
+@@ -201,6 +201,8 @@ static void delete_entry(const Arg *);
+ static void move_bottom(const Arg *);
+ static void render_cursor_move(const int, const int);
+ static void move_cursor(const Arg *);
++static void move_half_pane(const Arg *arg);
++static void move_full_pane(const Arg *arg);
+ static void move_top(const Arg *);
+ static void move_entries(const Arg *);
+ static void open_entry(const Arg *);
+-- 
+2.47.1.windows.2
+
+
+From cc59407ea61e776d9a9340b9b122e801c9744408 Mon Sep 17 00:00:00 2001
+From: Botond Kalocsai <kalocsaibotond@gmail.com>
+Date: Sat, 18 Jan 2025 13:32:08 +0100
+Subject: [PATCH 3/4] [feat] add cursor jump commands
+
+---
+ config.def.h |  3 +++
+ sfm.1        |  9 +++++++++
+ sfm.c        | 24 ++++++++++++++++++++++++
+ sfm.h        |  5 +++--
+ 4 files changed, 39 insertions(+), 2 deletions(-)
+
+diff --git a/config.def.h b/config.def.h
+index 90da233..d72e301 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -92,6 +92,9 @@ static Key nkeys[] = {
+ 	{ XK_DOWN,             move_cursor,      { .i = +1 }              },
+ 	{ 'k',                 move_cursor,      { .i = -1 }              },
+ 	{ XK_UP,               move_cursor,      { .i = -1 }              },
++	{ 'J',                 jump_cursor,      { .i = +1 }              },
++	{ 'K',                 jump_cursor,      { .i = -1 }              },
++	{ 'M',                 jump_cursor,      { .i = 0  }              },
+ 	{ XK_CTRL('u'),        move_half_pane,   { .i = -1 }              },
+ 	{ XK_CTRL('d'),        move_half_pane,   { .i = +1 }              },
+ 	{ '{',                 move_full_pane,   { .i = -1 }              },
+diff --git a/sfm.1 b/sfm.1
+index 0709831..12781bd 100644
+--- a/sfm.1
++++ b/sfm.1
+@@ -27,6 +27,15 @@ down
+ .B k
+ up
+ .TP
++.B J
++jump cursor down
++.TP
++.B K
++jump cursor up
++.TP
++.B M
++jump cursor to
++.TP
+ .B l
+ open dir | file
+ .TP
+diff --git a/sfm.c b/sfm.c
+index f5f0e07..951dbc1 100644
+--- a/sfm.c
++++ b/sfm.c
+@@ -1283,6 +1283,30 @@ move_cursor(const Arg *arg)
+ 	render_cursor_move(new_start_index, old_index);
+ }
+ 
++static void
++jump_cursor(const Arg *arg)
++{
++	int jump_target;
++	char jump_input[NAME_MAX];
++
++	if(0 < arg->i){
++		if(0 != get_user_input(jump_input, NAME_MAX, "jump cursor down: "))
++			return;
++		jump_target = strtol(jump_input, NULL, 10);
++	} else if (0 == arg->i){
++		if(0 != get_user_input(jump_input, NAME_MAX, "jump cursor to: "))
++			return;
++		jump_target = strtol(jump_input, NULL, 10)
++			- current_pane->current_index - 1;
++	} else {
++		if(0 != get_user_input(jump_input, NAME_MAX, "jump cursor up: "))
++			return;
++		jump_target = -strtol(jump_input, NULL, 10);
++	}
++	move_cursor(&(Arg) { .i = jump_target });
++	display_entry_details();
++}
++
+ static void
+ move_half_pane(const Arg *arg)
+ {
+diff --git a/sfm.h b/sfm.h
+index 6acc42b..286565e 100644
+--- a/sfm.h
++++ b/sfm.h
+@@ -201,8 +201,9 @@ static void delete_entry(const Arg *);
+ static void move_bottom(const Arg *);
+ static void render_cursor_move(const int, const int);
+ static void move_cursor(const Arg *);
+-static void move_half_pane(const Arg *arg);
+-static void move_full_pane(const Arg *arg);
++static void jump_cursor(const Arg *);
++static void move_half_pane(const Arg *);
++static void move_full_pane(const Arg *);
+ static void move_top(const Arg *);
+ static void move_entries(const Arg *);
+ static void open_entry(const Arg *);
+-- 
+2.47.1.windows.2
+
+
+From c347dd6ad389512ed74121b2016f1c4319100156 Mon Sep 17 00:00:00 2001
+From: Botond Kalocsai <kalocsaibotond@gmail.com>
+Date: Mon, 20 Jan 2025 13:43:17 +0100
+Subject: [PATCH 4/4] [feat] add entry number showing for cursor jump commands
+
+---
+ config.def.h |   6 +-
+ sfm.c        | 196 +++++++++++++++++++++++++++++++++++++++++++++++----
+ sfm.h        |   5 ++
+ 3 files changed, 190 insertions(+), 17 deletions(-)
+
+diff --git a/config.def.h b/config.def.h
+index d72e301..b2bbf3c 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -92,9 +92,9 @@ static Key nkeys[] = {
+ 	{ XK_DOWN,             move_cursor,      { .i = +1 }              },
+ 	{ 'k',                 move_cursor,      { .i = -1 }              },
+ 	{ XK_UP,               move_cursor,      { .i = -1 }              },
+-	{ 'J',                 jump_cursor,      { .i = +1 }              },
+-	{ 'K',                 jump_cursor,      { .i = -1 }              },
+-	{ 'M',                 jump_cursor,      { .i = 0  }              },
++	{ 'J',                 jump_cursor_down, { .i = +1 }              },
++	{ 'K',                 jump_cursor_up,   { .i = +1 }              },
++	{ 'M',                 jump_cursor,      { .i = +1 }              },
+ 	{ XK_CTRL('u'),        move_half_pane,   { .i = -1 }              },
+ 	{ XK_CTRL('d'),        move_half_pane,   { .i = +1 }              },
+ 	{ '{',                 move_full_pane,   { .i = -1 }              },
+diff --git a/sfm.c b/sfm.c
+index 951dbc1..5ccabe8 100644
+--- a/sfm.c
++++ b/sfm.c
+@@ -76,6 +76,7 @@ static pid_t fork_pid, main_pid;
+ static char **selected_entries = NULL;
+ static int selected_count = 0;
+ static int mode;
++static int move_cursor_render = 1;
+ 
+ static void
+ log_to_file(const char *func, int line, const char *format, ...)
+@@ -1280,7 +1281,105 @@ move_cursor(const Arg *arg)
+ 				i >= current_pane->current_index; i--)
+ 				select_entry(&current_pane->entries[i], Select);
+ 	}
+-	render_cursor_move(new_start_index, old_index);
++	if (move_cursor_render)
++		render_cursor_move(new_start_index, old_index);
++}
++
++static void
++show_entry_nums_down(void)
++{
++	int entry_number_len;
++	int entry_index;
++	char entry_name_tmp[NAME_MAX];
++
++	if (current_pane->entries == NULL)
++		return;
++	for (entry_index = current_pane->start_index;
++		entry_index < current_pane->start_index + term.rows - 2 &&
++		entry_index < current_pane->entry_count;
++		entry_index++) {
++		strncpy(entry_name_tmp,
++			current_pane->entries[entry_index].name,
++			NAME_MAX
++		);
++		entry_number_len = snprintf(
++			current_pane->entries[entry_index].name, NAME_MAX,
++			"%d ", entry_index - current_pane->current_index);
++		if (0 < entry_number_len){
++			strncpy(current_pane->entries[entry_index].name +
++				entry_number_len,
++				entry_name_tmp, NAME_MAX - entry_number_len);
++			update_entry(current_pane, entry_index);
++			strncpy(current_pane->entries[entry_index].name,
++				entry_name_tmp, NAME_MAX);
++		} else {
++			strncpy(current_pane->entries[entry_index].name,
++				entry_name_tmp, NAME_MAX);
++		}
++	}
++}
++
++static void
++jump_cursor_down(const Arg *arg)
++{
++	int jump_target;
++	char jump_input[NAME_MAX];
++
++	if(0 < arg->i)
++		show_entry_nums_down();
++	if(0 != get_user_input(jump_input, NAME_MAX, "jump cursor down: "))
++		goto cancel_jump_exit;
++	jump_target = strtol(jump_input, NULL, 10);
++
++	if(0 < arg->i){
++		move_cursor_render = 0;
++		move_cursor(&(Arg) { .i = jump_target });
++		move_cursor_render = 1;
++		update_screen();
++	} else {
++		move_cursor(&(Arg) { .i = jump_target });
++		display_entry_details();
++	}
++	return;
++cancel_jump_exit:
++	if(0 < arg->i)
++		update_screen();
++	else
++		display_entry_details();
++}
++
++static void
++show_entry_nums(void)
++{
++	int entry_number_len;
++	int entry_index;
++	char entry_name_tmp[NAME_MAX];
++
++	if (current_pane->entries == NULL)
++		return;
++	for (entry_index = current_pane->start_index;
++		entry_index < current_pane->start_index + term.rows - 2 &&
++		entry_index < current_pane->entry_count;
++		entry_index++) {
++		strncpy(entry_name_tmp,
++			current_pane->entries[entry_index].name,
++			NAME_MAX
++		);
++		entry_number_len = snprintf(
++			current_pane->entries[entry_index].name, NAME_MAX,
++			"%d ", entry_index + 1);
++		if (0 < entry_number_len){
++			strncpy(current_pane->entries[entry_index].name +
++				entry_number_len,
++				entry_name_tmp, NAME_MAX - entry_number_len);
++			update_entry(current_pane, entry_index);
++			strncpy(current_pane->entries[entry_index].name,
++				entry_name_tmp, NAME_MAX);
++		} else {
++			strncpy(current_pane->entries[entry_index].name,
++				entry_name_tmp, NAME_MAX);
++		}
++	}
+ }
+ 
+ static void
+@@ -1289,22 +1388,91 @@ jump_cursor(const Arg *arg)
+ 	int jump_target;
+ 	char jump_input[NAME_MAX];
+ 
++	if(0 < arg->i)
++		show_entry_nums();
++	if(0 != get_user_input(jump_input, NAME_MAX, "jump cursor to: "))
++		goto cancel_jump_exit;
++	jump_target = strtol(jump_input, NULL, 10)
++		- current_pane->current_index - 1;
++
+ 	if(0 < arg->i){
+-		if(0 != get_user_input(jump_input, NAME_MAX, "jump cursor down: "))
+-			return;
+-		jump_target = strtol(jump_input, NULL, 10);
+-	} else if (0 == arg->i){
+-		if(0 != get_user_input(jump_input, NAME_MAX, "jump cursor to: "))
+-			return;
+-		jump_target = strtol(jump_input, NULL, 10)
+-			- current_pane->current_index - 1;
++		move_cursor_render = 0;
++		move_cursor(&(Arg) { .i = jump_target });
++		move_cursor_render = 1;
++		update_screen();
+ 	} else {
+-		if(0 != get_user_input(jump_input, NAME_MAX, "jump cursor up: "))
+-			return;
+-		jump_target = -strtol(jump_input, NULL, 10);
++		move_cursor(&(Arg) { .i = jump_target });
++		display_entry_details();
+ 	}
+-	move_cursor(&(Arg) { .i = jump_target });
+-	display_entry_details();
++	return;
++cancel_jump_exit:
++	if(0 < arg->i)
++		update_screen();
++	else
++		display_entry_details();
++}
++
++static void
++show_entry_nums_up(void)
++{
++	int entry_number_len;
++	int entry_index;
++	char entry_name_tmp[NAME_MAX];
++
++	if (current_pane->entries == NULL)
++		return;
++	for (entry_index = current_pane->start_index;
++		entry_index < current_pane->start_index + term.rows - 2 &&
++		entry_index < current_pane->entry_count;
++		entry_index++) {
++		strncpy(entry_name_tmp,
++			current_pane->entries[entry_index].name,
++			NAME_MAX
++		);
++		entry_number_len = snprintf(
++			current_pane->entries[entry_index].name, NAME_MAX,
++			"%d ", current_pane->current_index - entry_index);
++		if (0 < entry_number_len){
++			strncpy(current_pane->entries[entry_index].name +
++				entry_number_len,
++				entry_name_tmp, NAME_MAX - entry_number_len);
++			update_entry(current_pane, entry_index);
++			strncpy(current_pane->entries[entry_index].name,
++				entry_name_tmp, NAME_MAX);
++		} else {
++			strncpy(current_pane->entries[entry_index].name,
++				entry_name_tmp, NAME_MAX);
++		}
++	}
++}
++
++static void
++jump_cursor_up(const Arg *arg)
++{
++	int jump_target;
++	char jump_input[NAME_MAX];
++
++	if(0 < arg->i)
++		show_entry_nums_up();
++	if(0 != get_user_input(jump_input, NAME_MAX, "jump cursor up: "))
++		goto cancel_jump_exit;
++	jump_target = -strtol(jump_input, NULL, 10);
++
++	if(0 < arg->i){
++		move_cursor_render = 0;
++		move_cursor(&(Arg) { .i = jump_target });
++		move_cursor_render = 1;
++		update_screen();
++	} else {
++		move_cursor(&(Arg) { .i = jump_target });
++		display_entry_details();
++	}
++	return;
++cancel_jump_exit:
++	if(0 < arg->i)
++		update_screen();
++	else
++		display_entry_details();
+ }
+ 
+ static void
+diff --git a/sfm.h b/sfm.h
+index 286565e..0f4c6ea 100644
+--- a/sfm.h
++++ b/sfm.h
+@@ -201,7 +201,12 @@ static void delete_entry(const Arg *);
+ static void move_bottom(const Arg *);
+ static void render_cursor_move(const int, const int);
+ static void move_cursor(const Arg *);
++static void show_entry_nums_down(void);
++static void jump_cursor_down(const Arg *);
++static void show_entry_nums(void);
+ static void jump_cursor(const Arg *);
++static void show_entry_nums_up(void);
++static void jump_cursor_up(const Arg *);
+ static void move_half_pane(const Arg *);
+ static void move_full_pane(const Arg *);
+ static void move_top(const Arg *);
+-- 
+2.47.1.windows.2
+
