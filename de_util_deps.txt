@@ -18,8 +18,7 @@ zoxide
 eza
 fd
 fzf
-yazi
-mc
+nnn
 
 dust
 gdu
