@@ -41,13 +41,23 @@ sudo git config --global user.name "Botond Kalocsai"
 ./install_surf.sh $1
 
 printf "\nSetting up global xinitrc\n\n"
-
+printf "\nSetting up global xorg configuration.\n\n"
 set_xkbmap="setxkbmap -option caps:swapescape hu"
-if ! grep -q "$set_xkbmap" /etc/X11/xinit/xinitrc.d/*; then
-  echo "$set_xkbmap" >90-set-xkbmap.sh
-  chmod o+rx 90-set-xkbmap.sh
-  sudo mkdir -p /etc/X11/xinit/xinitrc.d/
-  sudo mv 90-set-xkbmap.sh /etc/X11/xinit/xinitrc.d/
+
+xorg_keyboard_config='
+Section "InputClass"
+  Identifier "system-keyboard"
+  MatchIsKeyboard "on"
+  Option "XkbLayout" "hu"
+  Option "XkbModel" "pc105"
+  Option "XkbOptions" "caps:swapescape"
+EndSection
+' # I usually work on hungarian keyboards. I also like the esc - caps lock swap.
+if ! grep -q '"XkbLayout"' /etc/X11/xorg.conf.d/*; then
+  echo "$xorg_keyboard_config" >00-keyboard.conf
+  chmod o+rx 00-keyboard.conf
+  sudo mkdir -p /etc/X11/xorg.conf.d/
+  sudo mv 00-keyboard.conf /etc/X11/xorg.conf.d/
 fi
 
 suckless_xinitrc="slstatus & exec dwm"
