@@ -1,4 +1,6 @@
+####################
 # Build dependencies
+####################
 base-devel
 libX11-devel  # For st, slstatus
 libXft-devel  # For dwm, st
@@ -8,7 +10,9 @@ gcr-devel  # For surf
 git
 wget
 
+###############################
 # Graphical desktop environment
+###############################
 xorg-minimal
 xorg-fonts  # Without it a lot of symbols would miss
 setxkbmap
@@ -21,13 +25,16 @@ xrefresh
 xclip
 dmenu
 
+# Utilites
 sxiv
 fim
 mupdf
 zathura-pdf-mupdf
 mpv
 
+#############################
 # Console desktop environment
+#############################
 tmux  # It has true color, proper mouse support and performant rendering.
 reptyr
 physlock

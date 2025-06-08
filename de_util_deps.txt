@@ -1,17 +1,20 @@
+########################
+# Console workflow tools
+########################
+
 # Power management
-tlp  # I configure for laptops
+tlp  # I use laptops.
 acpi
 powertop
 
 # Printing, scanning
-cups
-hplip  # For my HP printer
-cnijfilter2  # For my Canon pixma printer
+cups  # Rarely, I sometime print documents.
+hplip  # For my HP printer.
+cnijfilter2  # For my Canon pixma printer.
 sane
 
-flatpak  # as a backup package manager
-
-# Console workflow tools
+# Backup package managers
+flatpak
 
 # Directory tree management
 zoxide
@@ -71,10 +74,13 @@ qalculate
 # MIscellaneous
 tldr
 nodejs  # Needed for LSP servers
-qemu
-freerdp
+qemu  # It is primarily for experimenting with my desktop environment builds.
+freerdp  # I need to remote work on Windows machines.
 
+##############
 # GUI utilites
+##############
+
 lyx  # it also gets texlive
 inkscape
 gimp
