@@ -42,7 +42,7 @@ sudo git config --global user.name "Botond Kalocsai"
 
 printf "\nSetting up global xinitrc\n\n"
 
-set_xkbmap="setxkbmap hu"
+set_xkbmap="setxkbmap -option caps:swapescape hu"
 if ! grep -q "$set_xkbmap" /etc/X11/xinit/xinitrc.d/*; then
   echo "$set_xkbmap" >90-set-xkbmap.sh
   chmod o+rx 90-set-xkbmap.sh
