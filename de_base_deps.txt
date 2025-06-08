@@ -11,7 +11,13 @@ wget
 # Graphical desktop environment
 xorg-minimal
 xorg-fonts  # Without it a lot of symbols would miss
-xorg-apps
+setxkbmap
+xrandr
+xgamma
+xbacklight
+xset
+xsetroot
+xrefresh
 xclip
 dmenu
 
