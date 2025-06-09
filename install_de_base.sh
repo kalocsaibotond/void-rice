@@ -84,6 +84,27 @@ xit' | sudo ex /etc/X11/xinit/xinitrc # Cleaning global xinitrc up
 printf "\nSetting up POSIX shell system-wide config into /etc/shrc .\n\n"
 #########################################################################
 
+# Swapping Esc and Caps Lock for console
+if ! grep -q "loadkeys /etc/swap_esc_capslock\.kmap" /etc/rc.local; then
+  dumpkeys >swap_esc_capslock.kmap
+  echo 'set extended
+set number
+g!/^keycode.*(Escape|Caps_Lock)/d
+% s/Caps_Lock/caps/
+% s/Escape/Caps_Lock/
+% s/caps/Escape/
+xit' | sudo ex swap_esc_capslock.kmap
+  chmod o+rx swap_esc_capslock.kmap
+  sudo mv swap_esc_capslock.kmap /etc/
+  echo 'set number
+$
+append
+
+loadkeys /etc/swap_esc_capslock.kmap
+.
+xit' | sudo ex /etc/rc.local
+fi
+
 sys_shrc='# Only apply in interactive shell sessions
 case $- in
 *i*) ;; # Interactive shell session
