@@ -11,28 +11,27 @@ else
   env_vars=''
 fi
 
-# Installing other utilites of my desktop environment
-########################################################################
-printf "\nLastly installing the utilites of my desktop environment:\n\n"
-########################################################################
+#######################################################################
+printf "\nIinstalling general utilites of the desktop environment:\n\n"
+#######################################################################
 sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_util_deps.txt)
 
 # Backup package managers.
 ###################################
-printf "\nInstalling Linuxbrew\n\n"
+printf "\nInstalling Linuxbrew.\n\n"
 ###################################
 mkdir -p $HOME/.cache/Homebrew
 NONINTERACTIVE=1 bash -c \
   "$(wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
 ########################################################
-printf "\nSetting up flatpak (needs reboot to work)\n\n"
+printf "\nSetting up flatpak (needs reboot to work).\n\n"
 ########################################################
 sudo $env_vars flatpak remote-add --if-not-exists flathub \
   https://flathub.org/repo/flathub.flatpakrepo
 
 ###################################
-printf "\nSetting up Linuxbrew\n\n"
+printf "\nSetting up Linuxbrew:\n\n"
 ###################################
 brew_init='eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
 if ! grep -q "$brew_init" /etc/profile.d/*; then
@@ -42,18 +41,18 @@ if ! grep -q "$brew_init" /etc/profile.d/*; then
 fi
 
 #############################
-printf "\nSetting up TLP\n\n"
+printf "\nSetting up TLP.\n\n"
 #############################
 sudo ln -sf /etc/sv/tlp /var/service # I usually work on laptops.
 
 ##############################
-printf "\nSetting up CUPS\n\n"
+printf "\nSetting up CUPS.\n\n"
 ##############################
 sudo touch /etc/sv/cupsd/down # Rarely, I have to print documents.
 sudo ln -sf /etc/sv/cupsd /var/service
 
 ################################
-printf "\nSetting up Zoxide\n\n"
+printf "\nSetting up Zoxide.\n\n"
 ################################
 zoxide_init='case $SHELL_NAME in
 "zsh") eval "$(zoxide init zsh --hook prompt)" ;;
@@ -70,11 +69,11 @@ if ! grep -q "$zoxide_init" /etc/shrc.d/*; then
 fi
 
 ################################
-printf "\nSetting up Neovim\n\n"
+printf "\nSetting up Neovim:\n\n"
 ################################
 sudo npm install -g neovim # The main text editor of my system.
 
 #################################################
-printf "\nInstall my dotfiles (with chezmoi)\n\n"
+printf "\nInstallng my dotfiles (with Chezmoi):\n\n"
 #################################################
 chezmoi init kalocsaibotond

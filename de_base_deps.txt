@@ -25,7 +25,7 @@ xrefresh
 xclip
 dmenu
 
-# Utilites
+# Basic utilites
 sxiv
 fim
 mupdf

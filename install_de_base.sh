@@ -21,37 +21,31 @@ sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_base_deps.txt)
 sudo ln -sf $(xbps-query -f w3m-img | grep w3mimgdisplay) \
   /usr/local/bin/w3mimgdisplay
 
-####################################################
-printf "\nConfiguring gpm to not start at boot:\n\n"
-####################################################
-sudo touch /etc/sv/gpm/down # I dont want it to start at boot
-sudo ln -sf /etc/sv/gpm /var/service
-
-######################################
-printf "\nConfiguring fontconfig:\n\n"
-######################################
-sudo ln -sf /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf \
-  /etc/fonts/conf.d/
-sudo xbps-reconfigure -f fontconfig
-
-###############################
-printf "\nConfiguring git:\n\n"
-###############################
+#####################################################################
+printf "\nConfiguring git globally with my credentials for root:\n\n"
+#####################################################################
 sudo git config --global user.email "kalocsaibotond@gmail.com"
 sudo git config --global user.name "Botond Kalocsai"
 
+#############################################################################
+printf "\nSystem-wide, from source, local installation of basic utilites:\n\n"
+#############################################################################
+# Graphical utilities
 ./install_dwm.sh $1
 ./install_slstatus.sh $1
 ./install_st.sh $1
 ./install_devour.sh $1
-./install_sfm.sh $1
 ./install_tabbed.sh $1
 ./install_surf.sh $1
 
-####################################################
-printf "\nSetting up global xorg configuration.\n\n"
-####################################################
+# Console utilites
+./install_sfm.sh $1
 
+##########################################################
+printf "\nSetting up, system-wide Xorg configuration:\n\n"
+##########################################################
+
+printf "\nSetting Xorg keyboard config and Esc - Caps Lock swap.\n\n"
 xorg_keyboard_config='
 Section "InputClass"
   Identifier "system-keyboard"
@@ -60,7 +54,7 @@ Section "InputClass"
   Option "XkbModel" "pc105"
   Option "XkbOptions" "caps:swapescape"
 EndSection
-' # I usually work on hungarian keyboards. I also like the esc - caps lock swap.
+' # I usually work on hungarian keyboards with esc - caps lock swapped.
 if ! grep -q '"XkbLayout"' /etc/X11/xorg.conf.d/*; then
   echo "$xorg_keyboard_config" >00-keyboard.conf
   chmod o+rx 00-keyboard.conf
@@ -68,6 +62,7 @@ if ! grep -q '"XkbLayout"' /etc/X11/xorg.conf.d/*; then
   sudo mv 00-keyboard.conf /etc/X11/xorg.conf.d/
 fi
 
+printf "\nSetting up xinitrc to run dwm and slstatus upon calling startx.\n\n"
 suckless_xinitrc="slstatus & exec dwm"
 if ! grep -q "$suckless_xinitrc" /etc/X11/xinit/xinitrc.d/*; then
   echo "$suckless_xinitrc" >99-suckless-xinitrc.sh
@@ -76,20 +71,21 @@ if ! grep -q "$suckless_xinitrc" /etc/X11/xinit/xinitrc.d/*; then
   sudo mv 99-suckless-xinitrc.sh /etc/X11/xinit/xinitrc.d/
 fi
 
+printf "\nDelete spurious xinitrc file content.\n\n"
 echo 'set number
 /twm/,$ delete
 xit' | sudo ex /etc/X11/xinit/xinitrc # Cleaning global xinitrc up
 
-#########################################################################
-printf "\nSetting up POSIX shell system-wide config into /etc/shrc .\n\n"
-#########################################################################
+############################################################################
+printf "\nSetting up console and shell system-wide configuration.\n\n"
+############################################################################
 
-# Swapping Esc and Caps Lock for console
+printf "\nSetting up Esc - Caps Lock swap on console:\n\n"
 if ! grep -q "loadkeys /etc/swap_esc_capslock\.kmap" /etc/rc.local; then
   dumpkeys >swap_esc_capslock.kmap
   echo 'set extended
 set number
-g!/^keycode.*(Escape|Caps_Lock)/d
+% global!/^keycode.*(Escape|Caps_Lock)/d
 % s/Caps_Lock/caps/
 % s/Escape/Caps_Lock/
 % s/caps/Escape/
@@ -105,6 +101,11 @@ loadkeys /etc/swap_esc_capslock.kmap
 xit' | sudo ex /etc/rc.local
 fi
 
+printf "\nConfiguring gpm to not start at boot:\n\n"
+sudo touch /etc/sv/gpm/down # I dont want it to start at boot
+sudo ln -sf /etc/sv/gpm /var/service
+
+printf "\nSetting up interactive POSIX shell startup file /etc/shrc .\n\n"
 sys_shrc='# Only apply in interactive shell sessions
 case $- in
 *i*) ;; # Interactive shell session
@@ -131,6 +132,7 @@ if ! [ -f /etc/shrc ] || ! grep -q "$sys_shrc" /etc/shrc; then
 fi
 sudo mkdir -p /etc/shrc.d
 
+printf "\nSetting up POSIX shell SHELL_NAME environment variable.\n\n"
 set_shell_name='export SHELL_NAME=$(ps -p $$ -o comm=)'
 if ! grep -q "$set_shell_name" /etc/shrc.d/*; then
   echo "$set_shell_name" >00-set-shell-name.sh
@@ -138,6 +140,7 @@ if ! grep -q "$set_shell_name" /etc/shrc.d/*; then
   sudo mv 00-set-shell-name.sh /etc/shrc.d/
 fi
 
+printf "\nSetting POSIX shell ENV environment variable to /etc/shrc .\n\n"
 set_env='export ENV=/etc/shrc'
 sudo mkdir -p /etc/profile.d/
 if ! grep -q "$set_env" /etc/profile.d/*; then
@@ -146,6 +149,7 @@ if ! grep -q "$set_env" /etc/profile.d/*; then
   sudo mv 00-set-env.sh /etc/profile.d/
 fi
 
+printf "\nSetting up Bash to source the value of ENV environment variable.\n\n"
 # Source POSIX shell configuration in bashrc
 source_env='[ -f "$ENV" ] && . $ENV'
 sudo mkdir -p /etc/bash/bashrc.d/
@@ -154,3 +158,10 @@ if ! grep -q "$source_env" /etc/bash/bashrc.d/*; then
   chmod o+rx 00-source-env.sh
   sudo mv 00-source-env.sh /etc/bash/bashrc.d/
 fi
+
+############################################################
+printf "\nConfiguring fontconfig for nerd font symbols:\n\n"
+############################################################
+sudo ln -sf /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf \
+  /etc/fonts/conf.d/
+sudo xbps-reconfigure -f fontconfig

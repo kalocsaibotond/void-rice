@@ -8,10 +8,10 @@ acpi
 powertop
 
 # Printing, scanning
-cups  # Rarely, I sometime print documents.
+cups  # Rarely, I print documents.
 hplip  # For my HP printer.
 cnijfilter2  # For my Canon pixma printer.
-sane
+sane  # I often scan documents.
 
 # Backup package managers
 flatpak
@@ -20,7 +20,7 @@ flatpak
 zoxide
 eza
 fd
-fzf
+fzf  # It is here because of its default behaviour, despite its universality.
 nnn
 
 dust
@@ -73,7 +73,7 @@ qalculate
 
 # MIscellaneous
 tldr
-nodejs  # Needed for LSP servers
+nodejs  # Needed for LSP servers.
 qemu  # It is primarily for experimenting with my desktop environment builds.
 freerdp  # I need to remote work on Windows machines.
 
