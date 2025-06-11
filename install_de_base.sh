@@ -51,7 +51,6 @@ Section "InputClass"
   Identifier "system-keyboard"
   MatchIsKeyboard "on"
   Option "XkbLayout" "hu"
-  Option "XkbModel" "pc105"
   Option "XkbOptions" "caps:swapescape"
 EndSection
 ' # I usually work on hungarian keyboards with esc - caps lock swapped.
