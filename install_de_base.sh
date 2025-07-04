@@ -27,9 +27,9 @@ printf "\nConfiguring git globally with my credentials for root:\n\n"
 sudo git config --global user.email "kalocsaibotond@gmail.com"
 sudo git config --global user.name "Botond Kalocsai"
 
-#############################################################################
+##############################################################################
 printf "\nSystem-wide, from source, local installation of basic utilites:\n\n"
-#############################################################################
+##############################################################################
 # Graphical utilities
 ./install_dwm.sh $1
 ./install_slstatus.sh $1
@@ -75,9 +75,9 @@ echo 'set number
 /twm/,$ delete
 xit' | sudo ex /etc/X11/xinit/xinitrc # Cleaning global xinitrc up
 
-############################################################################
+######################################################################
 printf "\nSetting up console and shell system-wide configuration.\n\n"
-############################################################################
+######################################################################
 
 printf "\nSetting up Esc - Caps Lock swap on console:\n\n"
 if ! grep -q "loadkeys /etc/swap_esc_capslock\.kmap" /etc/rc.local; then
@@ -131,6 +131,15 @@ if ! [ -f /etc/shrc ] || ! grep -q "$sys_shrc" /etc/shrc; then
 fi
 sudo mkdir -p /etc/shrc.d
 
+printf "\nSetting POSIX shell ENV environment variable to /etc/profile .\n\n"
+set_env='export ENV=/etc/shrc'
+sudo mkdir -p /etc/profile.d/
+if ! grep -q "$set_env" /etc/profile.d/*; then
+  echo "$set_env" >00-set-env.sh
+  chmod o+rx 00-set-env.sh
+  sudo mv 00-set-env.sh /etc/profile.d/
+fi
+
 printf "\nSetting up POSIX shell SHELL_NAME environment variable.\n\n"
 set_shell_name='export SHELL_NAME=$(ps -p $$ -o comm=)'
 if ! grep -q "$set_shell_name" /etc/shrc.d/*; then
@@ -139,13 +148,12 @@ if ! grep -q "$set_shell_name" /etc/shrc.d/*; then
   sudo mv 00-set-shell-name.sh /etc/shrc.d/
 fi
 
-printf "\nSetting POSIX shell ENV environment variable to /etc/shrc .\n\n"
-set_env='export ENV=/etc/shrc'
-sudo mkdir -p /etc/profile.d/
-if ! grep -q "$set_env" /etc/profile.d/*; then
-  echo "$set_env" >00-set-env.sh
-  chmod o+rx 00-set-env.sh
-  sudo mv 00-set-env.sh /etc/profile.d/
+printf "\nSetting up POSIX shell GPG_TTY environment variable.\n\n"
+set_gpg_tty='export GPG_TTY=$(tty)'
+if ! grep -q "$set_gpg_tty" /etc/shrc.d/*; then
+  echo "$set_gpg_tty" >10-set-gpg-tty.sh
+  chmod o+rx 10-set-gpg-tty.sh
+  sudo mv 10-set-gpg-tty.sh /etc/shrc.d/
 fi
 
 printf "\nSetting up Bash to source the value of ENV environment variable.\n\n"
