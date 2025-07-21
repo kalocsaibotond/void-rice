@@ -40,6 +40,13 @@ if ! grep -q "$brew_init" /etc/profile.d/*; then
   sudo mv linuxbrew-initialisation.sh /etc/profile.d/
 fi
 
+########################################
+printf "\nSet XDG default applications."
+########################################
+if ! [ -e /etc/xdg/mimeapps.list ]; then
+  sudo cp ./mimeapps.list /etc/xdg/
+fi
+
 ##############################
 printf "\nSetting up TLP.\n\n"
 ##############################
@@ -74,6 +81,6 @@ printf "\nSetting up Neovim:\n\n"
 sudo npm install -g neovim # The main text editor of my system.
 
 ####################################################
-printf "\nInstallng my dotfiles (with Chezmoi):\n\n"
+printf "\nInstalling my dotfiles (with Chezmoi):\n\n"
 ####################################################
 chezmoi init kalocsaibotond
