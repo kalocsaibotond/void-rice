@@ -16,12 +16,12 @@ printf "\nFetch local patches:\n\n"
 sudo mkdir patches
 cd patches
 sudo cp ../../local_patches/sfm/autojump/sfm-autojump-20250104-db66dd0.diff .
-sudo cp ../../local_patches/sfm/smartmoves/sfm-smartmoves-20250120-f1f1197.diff .
+sudo cp ../../local_patches/sfm/smartmoves/sfm-smartmoves-20250726-f1f1197.diff .
 cd ..
 
 printf "\nApplying patches\n\n"
 printf "\nApplying local smartmoves patch:\n\n"
-sudo git apply patches/sfm-smartmoves-20250120-f1f1197.diff
+sudo git apply patches/sfm-smartmoves-20250726-f1f1197.diff
 printf "\nApplying local autojump patch:\n\n"
 sudo patch -p1 <patches/sfm-autojump-20250104-db66dd0.diff
 
