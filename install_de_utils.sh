@@ -16,6 +16,8 @@ printf "\nIinstalling general utilites of the desktop environment:\n\n"
 #######################################################################
 sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_util_deps.txt)
 
+./install_nnn.sh $1
+
 # Backup package managers.
 ####################################
 printf "\nInstalling Linuxbrew.\n\n"

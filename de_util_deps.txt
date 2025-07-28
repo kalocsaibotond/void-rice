@@ -1,3 +1,8 @@
+####################
+# Build dependencies
+####################
+readline-devel # It is needed for building nnn.
+
 ########################
 # Console workflow tools
 ########################
@@ -21,7 +26,6 @@ zoxide
 eza
 fd
 fzf  # It is here because of its default behaviour, despite its universality.
-nnn
 
 dust
 gdu
