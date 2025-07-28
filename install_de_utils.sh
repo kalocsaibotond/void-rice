@@ -43,9 +43,7 @@ fi
 ########################################
 printf "\nSet XDG default applications."
 ########################################
-if ! [ -e /etc/xdg/mimeapps.list ]; then
-  sudo cp ./mimeapps.list /etc/xdg/
-fi
+sudo ln -sf $(pwd)/mimeapps.list /etc/xdg
 
 ##############################
 printf "\nSetting up TLP.\n\n"
