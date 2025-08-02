@@ -13,7 +13,7 @@ sudo $env_vars git clone https://git.suckless.org/st
 cd st || return 1
 sudo git checkout -b my_st || return 1
 
-printf "\nDownloading patches:\n\n"
+printf "\nDownloading patches or fetch local patches:\n\n"
 sudo mkdir patches
 cd patches
 sudo cp ../../local_patches/st/charpropoffsets/st-charpropoffsets-with-wide-glyph-support-20240927-0.9.2.diff .

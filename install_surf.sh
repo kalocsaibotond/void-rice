@@ -13,17 +13,18 @@ sudo $env_vars git clone https://git.suckless.org/surf
 cd surf || return 1
 sudo git checkout -b my_surf || return 1
 
-printf "\nDownloading patches:\n\n"
+printf "\nDownloading patches or fetching local patches:\n\n"
 sudo mkdir patches
 cd patches
+sudo cp ../../local_patches/surf/searchengines/surf-searchengines-20250802-48517e5.diff .
 sudo $env_vars wget \
   https://surf.suckless.org/patches/modal/surf-modal-20190209-d068a38.diff
 sudo $env_vars wget \
   https://surf.suckless.org/patches/clipboard-instead-of-primary/surf-clipboard-20200112-a6a8878.diff
 sudo $env_vars wget \
   https://surf.suckless.org/patches/startgo/surf-startgo-20200913-d068a38.diff
-sudo $env_vars wget \
-  https://surf.suckless.org/patches/searchengines/surf-searchengines-20220804-609ea1c.diff
+# sudo $env_vars wget \
+#   https://surf.suckless.org/patches/searchengines/surf-searchengines-20220804-609ea1c.diff
 cd ..
 
 printf "\nApplying patches\n\n"
@@ -34,7 +35,7 @@ sudo git apply patches/surf-clipboard-20200112-a6a8878.diff
 printf "\nApplying startgo patch:\n\n"
 sudo git apply patches/surf-startgo-20200913-d068a38.diff
 printf "\nApplying searchengines patch:\n\n"
-sudo patch -p1 <patches/surf-searchengines-20220804-609ea1c.diff
+sudo patch -p1 <patches/surf-searchengines-20250802-48517e5.diff
 
 printf "\nConfiguring patches\n\n"
 sudo cp config.def.h config.h
