@@ -2,10 +2,10 @@
 # Build dependencies
 ####################
 base-devel
-libX11-devel  # For st, slstatus
-libXft-devel  # For dwm, st
+libX11-devel  # For st, slstatus.
+libXft-devel  # For dwm, st.
 libXinerama-devel  # For dwm
-webkit2gtk-devel  # For surf
+libwebkit2gtk41-devel  # For surf.
 gcr-devel  # For surf
 git-netrc  # It only implements the get interface, needs an ~/.netrc(.gpg) file.
 wget
@@ -20,10 +20,11 @@ xrandr
 xgamma
 xbacklight
 xset
+xprop  # For surf.
 xsetroot
 xrefresh
 xclip
-dmenu
+dmenu  # It is also needed for surf.
 
 # Basic utilites
 sxiv
