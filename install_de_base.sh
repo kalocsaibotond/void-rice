@@ -19,7 +19,12 @@ printf "\nInstalling base desktop environment dependencies:\n\n"
 ################################################################
 sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_base_deps.txt)
 sudo ln -sf $(xbps-query -f w3m-img | grep w3mimgdisplay) \
-  /usr/local/bin/w3mimgdisplay
+  /usr/local/bin
+
+#########################################
+printf "\nInstalling system-wide opener."
+#########################################
+sudo ln -sf $(pwd)/opener.sh /usr/local/bin/opener
 
 #####################################################################
 printf "\nConfiguring git globally with my credentials for root:\n\n"
@@ -170,5 +175,5 @@ fi
 printf "\nConfiguring fontconfig for nerd font symbols:\n\n"
 ############################################################
 sudo ln -sf /usr/share/fontconfig/conf.avail/10-nerd-font-symbols.conf \
-  /etc/fonts/conf.d/
+  /etc/fonts/conf.d
 sudo xbps-reconfigure -f fontconfig
