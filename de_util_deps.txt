@@ -4,7 +4,7 @@
 readline-devel # It is needed for building nnn.
 
 ########################
-# Console workflow tools
+# Terminal workflow tools
 ########################
 
 # Power management
@@ -44,6 +44,9 @@ sd
 miller
 dasel
 fx
+glow
+
+7zip-unrar
 
 qrencode
 ImageMagick
@@ -85,6 +88,11 @@ freerdp  # I need to remote work on Windows machines.
 # GUI utilites
 ##############
 
-lyx  # it also gets texlive
+zathura-pdf-mupdf
+zathura-djvu
+zathura-cb
+zathura-ps
+
+lyx  # This also gets texlive.
 inkscape
 gimp

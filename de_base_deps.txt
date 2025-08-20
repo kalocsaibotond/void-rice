@@ -31,7 +31,6 @@ slock
 sxiv
 fim
 mupdf
-zathura-pdf-mupdf
 mpv
 
 #############################
@@ -41,6 +40,7 @@ tmux  # It has true color, proper mouse support and performant rendering.
 reptyr
 physlock
 gpm
+
 w3m
 w3m-img  # Needed for image support in w3m console browser
 
