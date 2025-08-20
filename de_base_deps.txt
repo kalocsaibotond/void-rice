@@ -25,6 +25,7 @@ xsetroot
 xrefresh
 xclip
 dmenu  # It is also needed for surf.
+slock
 
 # Basic utilites
 sxiv
