@@ -56,7 +56,7 @@ static const char *video_viewer[] = {
 	"  mpv --vo=drm $0\\n"
 	"fi"
 };
-static const char *libreoffice[] = { "devour", "libreoffice" };
+static const char *libreoffice[] = { "devour", "soffice" };
 static const char *gimp[] = { "devour", "gimp" };
 
 .
@@ -75,7 +75,7 @@ static const char *videos[] =           {
 	"wav", "mp3", "flac", "aac", "ogg", "aiff", "wma", "alac", "pcm"
 };
 static const char *office_documents[] = {
-	"odt", "doc", "docx", "xls", "xlsx", "odp", "ods", "pptx", "odg"
+	"odt", "sxw", "doc", "docx", "xls", "xlsx", "odp", "ods", "pptx", "odg"
 };
 static const char *gimp_files[] =       { "xcf" };
 

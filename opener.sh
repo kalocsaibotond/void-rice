@@ -1,276 +1,66 @@
 #!/bin/sh
 
-# Description: Sample script to play files in apps by file type or mime
+# Description: Script to play files in apps by file extension or mime.
 #
-# Shell: POSIX compliant
-# Usage: nuke filepath
+# Shell: POSIX compliant, preferentially dash.
+# Usage: opener.sh filepath
 #
 # Integration with nnn:
 #   1. Export the required config:
-#         export NNN_OPENER=/absolute/path/to/nuke
-#         # Otherwise, if nuke is in $PATH
-#         # export NNN_OPENER=nuke
+#         export NNN_OPENER=/opt/void-rice/opener.sh
+#         # Otherwise, if opener.sh is in $PATH as opener
+#         # export NNN_OPENER=opener
 #   2. Run nnn with the program option to indicate a CLI opener
 #         nnn -c
 #         # The -c program option overrides option -e
-#   3. nuke can use nnn plugins (e.g. mocq is used for audio), $PATH is updated.
+#   3. Opener can use nnn plugins (e.g. mocq is used for audio), $PATH is updated.
 #
 # Details:
-#   Inspired by ranger's scope.sh, modified for usage with nnn.
+#   Inspired by ranger's scope.sh and nnn-s nuke.
 #
 #   Guards against accidentally opening mime types like executables, shared libs etc.
 #
 #   Tries to play 'file' (1st argument) in the following order:
 #     1. by extension
-#     2. by mime (image, video, audio, pdf)
-#     3. by mime (other file types)
-#     4. by mime (prompt and run executables)
+#     2. by mime
+#     3. by mime (prompt and run executables)
 #
-# Modification tips:
-#   1. Invokes CLI utilities by default. Set GUI to 1 to enable GUI apps.
-#   2. PAGER is "less -R".
-#   3. Start GUI apps in bg to unblock. Redirect stdout and strerr if required.
-#   4. Some CLI utilities are piped to the $PAGER, to wait and quit uniformly.
-#   5. If the output cannot be paged use "read -r _" to wait for user input.
-#   6. On a DE, try 'xdg-open' or 'open' in handle_fallback() as last resort.
-#
-#   Feel free to change the utilities to your favourites and add more mimes.
-#
-# Defaults:
-#   By extension (only the enabled ones):
-#      most archives: list with atool, bsdtar
-#      rar: list with unrar
-#      7-zip: list with 7z
-#      pdf: zathura (GUI), pdftotext, mutool, exiftool
-#      audio: mocq (nnn plugin using MOC), mpv, media_client (Haiku), mediainfo, exiftool
-#      avi|mkv|mp4: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
-#      log: vi
-#      torrent: rtorrent, transmission-show
-#      odt|ods|odp|sxw: odt2txt
-#      md: glow (https://github.com/charmbracelet/glow), lowdown (https://kristaps.bsd.lv/lowdown)
-#      htm|html|xhtml: w3m, lynx, elinks
-#      json: jq, python (json.tool module)
-#   Multimedia by mime:
-#      image/*: imv/sxiv/nsxiv (GUI), viu (https://github.com/atanunq/viu), img2txt, exiftool
-#      video/*: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
-#      audio/*: mocq (nnn plugin using MOC), mpv, media_client (Haiku), mediainfo, exiftool
-#      application/pdf: zathura (GUI), pdftotext, mutool, exiftool
-#   Other mimes:
-#      text/troff: man -l
-#      text/* | */xml: vi
-#      image/vnd.djvu): djvutxt, exiftool
-#
-# TODO:
-#   1. Adapt, test and enable all mimes
-#   2. Clean-up the unnecessary exit codes
+#   By default it starts GUI apps in a xorg sesssion. Set GUI=0 to disable
+#   GUI apps. It starts GUI apps with devour to imitate CLI app behaviour.
 
-# set to 1 to enable GUI apps and/or BIN execution
-GUI="${GUI:-0}"
+if [ -z "$GUI"]; then
+  if [ -n "$DISPLAY" ]; then
+    GUI=1
+  else
+    GUI=0
+  fi
+fi
+# Set to BIN=1 to enable binary execcution.
 BIN="${BIN:-0}"
 
 set -euf -o noclobber -o noglob -o nounset
 IFS="$(printf '%b_' '\n')"
-IFS="${IFS%_}" # protect trailing \n
+IFS="${IFS%_}" # Protect trailing \n .
 
-PATH=$PATH:"${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins"
 IMAGE_CACHE_PATH="$(dirname "$1")"/.thumbs
 
-FPATH="$1"
-FNAME=$(basename "$1")
+FILEPATH="$1"
+FILENAME=$(basename "$1")
 EDITOR="${VISUAL:-${EDITOR:-vi}}"
 PAGER="${PAGER:-less -R}"
-ext="${FNAME##*.}"
-if [ -n "$ext" ]; then
-  ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
+EXTENSION="${FILENAME##*.}"
+if [ -n "$EXTENSION" ]; then
+  EXTENSION="$(printf "%s" "${EXTENSION}" | tr '[:upper:]' '[:lower:]')"
 fi
 
-is_mac() {
-  uname | grep -q "Darwin"
-}
+TERMINAL_COLUMNS=$(tput cols)
+TERMINAL_LINES=$(tput lines)
+TERMINAL_FONT_WIDTH=5
+TERMINAL_FONT_HEIGHT=10
+TERMINAL_WIDTH=$(($TERMINAL_COLUMNS * $TERMINAL_FONT_WIDTH))
+TERMINAL_HEIGHT=$(($TERMINAL_LINES * $TERMINAL_FONT_HEIGHT))
 
-handle_pdf() {
-  if [ "$GUI" -ne 0 ]; then
-    if is_mac; then
-      nohup open "${FPATH}" >/dev/null 2>&1 &
-    elif type zathura >/dev/null 2>&1; then
-      nohup zathura "${FPATH}" >/dev/null 2>&1 &
-    else
-      return
-    fi
-  elif type pdftotext >/dev/null 2>&1; then
-    ## Preview as text conversion
-    pdftotext -l 10 -nopgbrk -q -- "${FPATH}" - | eval "$PAGER"
-  elif type mutool >/dev/null 2>&1; then
-    mutool draw -F txt -i -- "${FPATH}" 1-10 | eval "$PAGER"
-  elif type exiftool >/dev/null 2>&1; then
-    exiftool "${FPATH}" | eval "$PAGER"
-  else
-    return
-  fi
-  exit 0
-}
-
-handle_audio() {
-  if type mocp >/dev/null 2>&1 && type mocq >/dev/null 2>&1; then
-    mocq "${FPATH}" "opener" >/dev/null 2>&1
-  elif type mpv >/dev/null 2>&1; then
-    mpv "${FPATH}" >/dev/null 2>&1 &
-  elif type media_client >/dev/null 2>&1; then
-    media_client play "${FPATH}" >/dev/null 2>&1 &
-  elif type mediainfo >/dev/null 2>&1; then
-    mediainfo "${FPATH}" | eval "$PAGER"
-  elif type exiftool >/dev/null 2>&1; then
-    exiftool "${FPATH}" | eval "$PAGER"
-  else
-    return
-  fi
-  exit 0
-}
-
-handle_video() {
-  if [ "$GUI" -ne 0 ]; then
-    if is_mac; then
-      nohup open "${FPATH}" >/dev/null 2>&1 &
-    elif type smplayer >/dev/null 2>&1; then
-      nohup smplayer "${FPATH}" >/dev/null 2>&1 &
-    elif type mpv >/dev/null 2>&1; then
-      nohup mpv "${FPATH}" >/dev/null 2>&1 &
-    else
-      return
-    fi
-  elif type ffmpegthumbnailer >/dev/null 2>&1; then
-    # Thumbnail
-    [ -d "${IMAGE_CACHE_PATH}" ] || mkdir "${IMAGE_CACHE_PATH}"
-    ffmpegthumbnailer -i "${FPATH}" -o "${IMAGE_CACHE_PATH}/${FNAME}.jpg" -s 0
-    viu -n "${IMAGE_CACHE_PATH}/${FNAME}.jpg" | eval "$PAGER"
-  elif type mediainfo >/dev/null 2>&1; then
-    mediainfo "${FPATH}" | eval "$PAGER"
-  elif type exiftool >/dev/null 2>&1; then
-    exiftool "${FPATH}" | eval "$PAGER"
-  else
-    return
-  fi
-  exit 0
-}
-
-# handle this extension and exit
-handle_extension() {
-  case "${ext}" in
-  ## Archive
-  a | ace | alz | arc | arj | bz | bz2 | cab | cpio | deb | gz | jar | lha | lz | lzh | lzma | lzo | \
-    rpm | rz | t7z | tar | tbz | tbz2 | tgz | tlz | txz | tZ | tzo | war | xpi | xz | Z | zip)
-    if type atool >/dev/null 2>&1; then
-      atool --list -- "${FPATH}" | eval "$PAGER"
-      exit 0
-    elif type bsdtar >/dev/null 2>&1; then
-      bsdtar --list --file "${FPATH}" | eval "$PAGER"
-      exit 0
-    fi
-    exit 1
-    ;;
-  rar)
-    if type unrar >/dev/null 2>&1; then
-      ## Avoid password prompt by providing empty password
-      unrar lt -p- -- "${FPATH}" | eval "$PAGER"
-    fi
-    exit 1
-    ;;
-  7z)
-    if type 7z >/dev/null 2>&1; then
-      ## Avoid password prompt by providing empty password
-      7z l -p -- "${FPATH}" | eval "$PAGER"
-      exit 0
-    fi
-    exit 1
-    ;;
-
-  ## PDF
-  pdf)
-    handle_pdf
-    exit 1
-    ;;
-
-  ## Audio
-  aac | flac | m4a | mid | midi | mpa | mp2 | mp3 | ogg | wav | wma)
-    handle_audio
-    exit 1
-    ;;
-
-  ## Video
-  avi | mkv | mp4)
-    handle_video
-    exit 1
-    ;;
-
-  ## Log files
-  log)
-    "$EDITOR" "${FPATH}"
-    exit 0
-    ;;
-
-  ## BitTorrent
-  torrent)
-    if type rtorrent >/dev/null 2>&1; then
-      rtorrent "${FPATH}"
-      exit 0
-    elif type transmission-show >/dev/null 2>&1; then
-      transmission-show -- "${FPATH}"
-      exit 0
-    fi
-    exit 1
-    ;;
-
-  ## OpenDocument
-  odt | ods | odp | sxw)
-    if type odt2txt >/dev/null 2>&1; then
-      ## Preview as text conversion
-      odt2txt "${FPATH}" | eval "$PAGER"
-      exit 0
-    fi
-    exit 1
-    ;;
-
-  ## Markdown
-  md)
-    if type glow >/dev/null 2>&1; then
-      glow -sdark "${FPATH}" | eval "$PAGER"
-      exit 0
-    elif type lowdown >/dev/null 2>&1; then
-      cols=$(tput cols)
-      lowdown -Tterm --term-width="$cols" --term-column="$cols" "${FPATH}" | eval "$PAGER"
-      exit 0
-    fi
-    ;;
-
-  ## HTML
-  htm | html | xhtml)
-    ## Preview as text conversion
-    if type w3m >/dev/null 2>&1; then
-      w3m -dump "${FPATH}" | eval "$PAGER"
-      exit 0
-    elif type lynx >/dev/null 2>&1; then
-      lynx -dump -- "${FPATH}" | eval "$PAGER"
-      exit 0
-    elif type elinks >/dev/null 2>&1; then
-      elinks -dump "${FPATH}" | eval "$PAGER"
-      exit 0
-    fi
-    ;;
-
-  ## JSON
-  json)
-    if type jq >/dev/null 2>&1; then
-      jq --color-output . "${FPATH}" | eval "$PAGER"
-      exit 0
-    elif type python >/dev/null 2>&1; then
-      python -m json.tool -- "${FPATH}" | eval "$PAGER"
-      exit 0
-    fi
-    ;;
-  esac
-}
-
-# sets the variable abs_target, this should be faster than calling printf
+# Sets the variable abs_target, this should be faster than calling printf.
 abspath() {
   case "$1" in
   /*) abs_target="$1" ;;
@@ -278,7 +68,7 @@ abspath() {
   esac
 }
 
-# storing the result to a tmp file is faster than calling listimages twice
+# Storing the result to a tmp file is faster than calling listimages twice.
 listimages() {
   find -L "///${1%/*}" -maxdepth 1 -type f -print0 |
     grep -izZE '\.(jpe?g|png|gif|webp|tiff|bmp|ico|svg)$' |
@@ -287,7 +77,7 @@ listimages() {
 
 load_dir() {
   abspath "$2"
-  tmp="${TMPDIR:-/tmp}/nuke_$$"
+  tmp="${TMPDIR:-/tmp}/opener_$$"
   trap 'rm -f -- "$tmp"' EXIT
   count="$(listimages "$abs_target" | grep -a -m 1 -ZznF "$abs_target" | cut -d: -f1)"
 
@@ -303,76 +93,527 @@ load_dir() {
   fi
 }
 
-handle_multimedia() {
-  ## Size of the preview if there are multiple options or it has to be
-  ## rendered from vector graphics. If the conversion program allows
-  ## specifying only one dimension while keeping the aspect ratio, the width
-  ## will be used.
-  # local DEFAULT_SIZE="1920x1080"
+handle_archive() {
+  if command -v tar >/dev/null 2>&1; then
+    tar --list --file "${FILEPATH}" | eval "$PAGER"
+  elif command -v bsdtar >/dev/null 2>&1; then
+    bsdtar --list --file "${FILEPATH}" | eval "$PAGER"
+  elif command -v atool >/dev/null 2>&1; then
+    atool --list -- "${FILEPATH}" | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
 
-  mimetype="${1}"
-  case "${mimetype}" in
-  ## SVG
-  # image/svg+xml|image/svg)
-  #     convert -- "${FPATH}" "${IMAGE_CACHE_PATH}" && exit 6
-  #     exit 1;;
+handle_7zip() {
+  if command -v 7z >/dev/null 2>&1; then
+    ## Avoid password prompt by providing empty password
+    7z l -p -- "${FILEPATH}" | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
 
-  ## DjVu
-  # image/vnd.djvu)
-  #     ddjvu -format=tiff -quality=90 -page=1 -size="${DEFAULT_SIZE}" \
-  #           - "${IMAGE_CACHE_PATH}" < "${FPATH}" \
-  #           && exit 6 || exit 1;;
+handle_rar() {
+  if command -v unrar >/dev/null 2>&1; then
+    ## Avoid password prompt by providing empty password
+    unrar lt -p- -- "${FILEPATH}" | eval "$PAGER"
+  elif command -v 7z >/dev/null 2>&1; then
+    ## Avoid password prompt by providing empty password
+    7z l -p -- "${FILEPATH}" | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
 
-  ## Image
-  image/*)
-    if [ "$GUI" -ne 0 ]; then
-      if is_mac; then
-        nohup open "${FPATH}" >/dev/null 2>&1 &
-        exit 0
-      elif type imv >/dev/null 2>&1; then
-        load_dir imv "${FPATH}" >/dev/null 2>&1 &
-        exit 0
-      elif type imvr >/dev/null 2>&1; then
-        load_dir imvr "${FPATH}" >/dev/null 2>&1 &
-        exit 0
-      elif type sxiv >/dev/null 2>&1; then
-        load_dir sxiv "${FPATH}" >/dev/null 2>&1 &
-        exit 0
-      elif type nsxiv >/dev/null 2>&1; then
-        load_dir nsxiv "${FPATH}" >/dev/null 2>&1 &
-        exit 0
-      fi
-    elif type viu >/dev/null 2>&1; then
-      viu -n "${FPATH}" | eval "$PAGER"
-      exit 0
-    elif type img2txt >/dev/null 2>&1; then
-      img2txt --gamma=0.6 -- "${FPATH}" | eval "$PAGER"
-      exit 0
-    elif type exiftool >/dev/null 2>&1; then
-      exiftool "${FPATH}" | eval "$PAGER"
-      exit 0
+t_handle_image() {
+  if command -v w3mimgdisplay >/dev/null 2>&1; then
+    echo "0;1;0;0;${TERMINAL_WIDTH};${TERMINAL_HEIGHT};;;;;${FILEPATH}
+3;" | w3mimgdisplay
+  elif command -v viu >/dev/null 2>&1; then
+    viu -n "${FILEPATH}" | eval "$PAGER"
+  elif command -v img2txt >/dev/null 2>&1; then
+    img2txt --gamma=0.6 -- "${FILEPATH}" | eval "$PAGER"
+  elif command -v exiftool >/dev/null 2>&1; then
+    exiftool "${FILEPATH}" | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_image() {
+  if [ "$GUI" -ne 0 ]; then
+    if command -v nsxiv >/dev/null 2>&1; then
+      devour load_dir nsxiv "${FILEPATH}"
+    elif command -v sxiv >/dev/null 2>&1; then
+      devour load_dir sxiv "${FILEPATH}"
+    elif command -v fim >/dev/null 2>&1; then
+      devour load_dir fim "${FILEPATH}"
+    elif command -v mupdf >/dev/null 2>&1; then
+      devour mupdf "${FILEPATH}"
+    elif command -v feh >/dev/null 2>&1; then
+      devour load_dir feh "${FILEPATH}"
+    elif command -v imv >/dev/null 2>&1; then
+      devour load_dir imv "${FILEPATH}"
+    elif command -v imvr >/dev/null 2>&1; then
+      devour load_dir imvr "${FILEPATH}"
+    else
+      t_handle_image
+      return
     fi
-    # local orientation
-    # orientation="$( identify -format '%[EXIF:Orientation]\n' -- "${FPATH}" )"
-    ## If orientation data is present and the image actually
-    ## needs rotating ("1" means no rotation)...
-    # if [[ -n "$orientation" && "$orientation" != 1 ]]; then
-    ## ...auto-rotate the image according to the EXIF data.
-    # convert -- "${FPATH}" -auto-orient "${IMAGE_CACHE_PATH}" && exit 6
-    # fi
+  else
+    if command -v fim >/dev/null 2>&1; then
+      load_dir fim "${FILEPATH}"
+    elif command -v fbi >/dev/null 2>&1; then
+      load_dir fbi "${FILEPATH}"
+    elif command -v fbvis >/dev/null 2>&1; then
+      fbvis "${FILEPATH}"
+    elif command -v fbv >/dev/null 2>&1; then
+      fbv "${FILEPATH}"
+    elif command -v fbpdf >/dev/null 2>&1; then
+      fbpdf "${FILEPATH}"
+    else
+      t_handle_image
+      return
+    fi
+  fi
+  exit 0
+}
 
-    ## `w3mimgdisplay` will be called for all images (unless overridden
-    ## as above), but might fail for unsupported types.
-    exit 7
-    ;;
+t_handle_djvu() {
+  if command -v djvutxt >/dev/null 2>&1; then
+    ## Preview as text conversion (requires djvulibre)
+    djvutxt "${FILEPATH}" | eval "$PAGER"
+  elif command -v exiftool >/dev/null 2>&1; then
+    exiftool "${FILEPATH}" | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
 
-  ## PDF
-  application/pdf)
-    handle_pdf
+handle_djvu() {
+  if [ "$GUI" -ne 0 ]; then
+    if command -v zathura >/dev/null 2>&1; then
+      devour zathura "${FILEPATH}"
+    elif command -v fim >/dev/null 2>&1; then
+      devour fim "${FILEPATH}"
+    else
+      t_handle_djvu
+      return
+    fi
+  else
+    if command -v fbdjvu >/dev/null 2>&1; then
+      fbdjvu "${FILEPATH}"
+    elif command -v fim >/dev/null 2>&1; then
+      devour fim "${FILEPATH}"
+    else
+      t_handle_djvu
+      return
+    fi
+  fi
+  exit 0
+}
+
+t_handle_document() {
+  if command -v mutool >/dev/null 2>&1; then
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+  elif [ "pdf" = "${EXTENSION}" ] && command -v pdftotext >/dev/null 2>&1; then
+    pdftotext -l 10 -nopgbrk -q -- "${FILEPATH}" - | eval "$PAGER"
+  elif command -v exiftool >/dev/null 2>&1; then
+    exiftool "${FILEPATH}" | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_document() {
+  if [ "$GUI" -ne 0 ]; then
+    if command -v mupdf >/dev/null 2>&1; then
+      devour mupdf "${FILEPATH}"
+    else
+      t_handle_document
+      return
+    fi
+  else
+    if command -v fbpdf >/dev/null 2>&1; then
+      fbpdf "${FILEPATH}"
+    else
+      t_handle_document
+      return
+    fi
+  fi
+  exit 0
+}
+
+handle_audio() {
+  if command -v mpv >/dev/null 2>&1; then
+    if [ "$GUI" -ne 0 ]; then
+      devour mpv "${FILEPATH}"
+    else
+      mpv --vo=drm "${FILEPATH}"
+    fi
+  elif command -v mocp >/dev/null 2>&1 && command -v mocq >/dev/null 2>&1; then
+    mocq "${FILEPATH}" "opener"
+  elif command -v ffplay >/dev/null 2>&1; then
+    if [ "$GUI" -ne 0 ]; then
+      devour ffplay "${FILEPATH}"
+    else
+      ffplay "${FILEPATH}"
+    fi
+  elif command -v media_client >/dev/null 2>&1; then
+    media_client play "${FILEPATH}"
+  elif command -v mediainfo >/dev/null 2>&1; then
+    mediainfo "${FILEPATH}" | eval "$PAGER"
+  elif command -v exiftool >/dev/null 2>&1; then
+    exiftool "${FILEPATH}" | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
+
+t_handle_video() {
+  if command -v w3mimgdisplay >/dev/null 2>&1 &&
+    command -v ffmpegthumbnailer >/dev/null 2>&1; then
+    # Thumbnail
+    [ -d "${IMAGE_CACHE_PATH}" ] || mkdir "${IMAGE_CACHE_PATH}"
+    ffmpegthumbnailer -i "${FILEPATH}" -o "${IMAGE_CACHE_PATH}/${FILENAME}.jpg" -s 0
+    echo "0;1;0;0;${TERMINAL_WIDTH};${TERMINAL_HEIGHT};;;;;${IMAGE_CACHE_PATH}/${FILENAME}
+3;" | w3mimgdisplay
+  elif command -v viu >/dev/null 2>&1 &&
+    command -v ffmpegthumbnailer >/dev/null 2>&1; then
+    # Thumbnail
+    [ -d "${IMAGE_CACHE_PATH}" ] || mkdir "${IMAGE_CACHE_PATH}"
+    ffmpegthumbnailer -i "${FILEPATH}" -o "${IMAGE_CACHE_PATH}/${FILENAME}.jpg" -s 0
+    viu -n "${IMAGE_CACHE_PATH}/${FILENAME}.jpg" | eval "$PAGER"
+  elif command -v mediainfo >/dev/null 2>&1; then
+    mediainfo "${FILEPATH}" | eval "$PAGER"
+  elif command -v exiftool >/dev/null 2>&1; then
+    exiftool "${FILEPATH}" | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_video() {
+  if [ "$GUI" -ne 0 ]; then
+    if command -v mpv >/dev/null 2>&1; then
+      devour mpv "${FILEPATH}"
+    elif command -v smplayer >/dev/null 2>&1; then
+      devour smplayer "${FILEPATH}"
+    elif command -v ffplay >/dev/null 2>&1; then
+      devour ffplay "${FILEPATH}"
+    else
+      t_handle_video
+      return
+    fi
+  else
+    if command -v mpv >/dev/null 2>&1; then
+      mpv --vo=drm "${FILEPATH}"
+    elif command -v ffplay >/dev/null 2>&1; then
+      ffplay "${FILEPATH}"
+    else
+      t_handle_video
+      return
+    fi
+  fi
+  exit 0
+}
+
+t_handle_office_docs() {
+  if command -v soffice >/dev/null 2>&1; then
+    ## Preview as text conversion
+    soffice --cat "${FILEPATH}" | eval "$PAGER"
+  elif command -v odt2txt >/dev/null 2>&1; then
+    ## Preview as text conversion
+    odt2txt "${FILEPATH}" | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_office_docs() {
+  if [ "$GUI" -ne 0 ]; then
+    if command -v soffice >/dev/null 2>&1; then
+      devour soffice "${FILEPATH}"
+    else
+      t_handle_office_docs
+      return
+    fi
+  else
+    t_handle_office_docs
+    return
+  fi
+  exit 0
+}
+
+t_handle_html() {
+  if command -v w3m >/dev/null 2>&1; then
+    w3m "${FILEPATH}"
+  elif command -v lynx >/dev/null 2>&1; then
+    lynx "${FILEPATH}"
+  elif command -v elinks >/dev/null 2>&1; then
+    elinks "${FILEPATH}"
+  elif command -v bat >/dev/null 2>&1; then
+    bat "${FILEPATH}"
+  elif command -v "$PAGER" >/dev/null 2>&1; then
+    "$PAGER" "${FILEPATH}"
+  elif command -v "$EDITOR" >/dev/null 2>&1; then
+    "$EDITOR" "${FILEPATH}"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_html() {
+  if [ "$GUI" -ne 0 ]; then
+    if command -v surf >/dev/null 2>&1; then
+      devour surf "${FILEPATH}"
+    elif command -v netsurf >/dev/null 2>&1; then
+      devour netsurf "${FILEPATH}"
+    else
+      t_handle_html
+      return
+    fi
+  else
+    t_handle_html
+    return
+  fi
+  exit 0
+}
+
+handle_markdown() {
+  if command -v glow >/dev/null 2>&1; then
+    glow -sdark "${FILEPATH}" | eval "$PAGER"
+  elif command -v lowdown >/dev/null 2>&1; then
+    lowdown -Tterm --term-width="$TERMINAL_COLUMNS" \
+      --term-column="$TERMINAL_COLUMNS" "${FILEPATH}" | eval "$PAGER"
+  elif command -v bat >/dev/null 2>&1; then
+    bat "${FILEPATH}"
+  elif command -v "$PAGER" >/dev/null 2>&1; then
+    "$PAGER" "${FILEPATH}"
+  elif command -v "$EDITOR" >/dev/null 2>&1; then
+    "$EDITOR" "${FILEPATH}"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_json() {
+  if command -v fx >/dev/null 2>&1; then
+    fx "${FILEPATH}"
+  elif command -v dasel >/dev/null 2>&1; then
+    dasel --pretty --colour -f "${FILEPATH}" | eval "$PAGER"
+  elif command -v jq >/dev/null 2>&1; then
+    jq --color-output . "${FILEPATH}" | eval "$PAGER"
+  elif command -v bat >/dev/null 2>&1; then
+    bat "${FILEPATH}"
+  elif command -v "$PAGER" >/dev/null 2>&1; then
+    "$PAGER" "${FILEPATH}"
+  elif command -v "$EDITOR" >/dev/null 2>&1; then
+    "$EDITOR" "${FILEPATH}"
+  elif command -v python >/dev/null 2>&1; then
+    python -m json.tool -- "${FILEPATH}" | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_yaml() {
+  if command -v fx >/dev/null 2>&1; then
+    fx "${FILEPATH}"
+  elif command -v dasel >/dev/null 2>&1; then
+    dasel --pretty --colour -f "${FILEPATH}" | eval "$PAGER"
+  elif command -v yq >/dev/null 2>&1; then
+    yq --color-output . "${FILEPATH}" | eval "$PAGER"
+  elif command -v bat >/dev/null 2>&1; then
+    bat "${FILEPATH}"
+  elif command -v "$PAGER" >/dev/null 2>&1; then
+    "$PAGER" "${FILEPATH}"
+  elif command -v "$EDITOR" >/dev/null 2>&1; then
+    "$EDITOR" "${FILEPATH}"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_data_format() {
+  if command -v dasel >/dev/null 2>&1; then
+    dasel --pretty --colour -f "${FILEPATH}" | eval "$PAGER"
+  elif command -v jq >/dev/null 2>&1; then
+    yq --color-output . "${FILEPATH}" | eval "$PAGER"
+  elif command -v bat >/dev/null 2>&1; then
+    bat "${FILEPATH}"
+  elif command -v "$PAGER" >/dev/null 2>&1; then
+    "$PAGER" "${FILEPATH}"
+  elif command -v "$EDITOR" >/dev/null 2>&1; then
+    "$EDITOR" "${FILEPATH}"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_bittorrent() {
+  if command -v btinfo >/dev/null 2>&1; then
+    btinfo "${FILEPATH}" | eval "$PAGER"
+  elif command -v rtorrent >/dev/null 2>&1; then
+    rtorrent "${FILEPATH}"
+  elif command -v transmission-show >/dev/null 2>&1; then
+    transmission-show -- "${FILEPATH}"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_extension() {
+  case "${EXTENSION}" in
+
+  a | ar | ace | alz | arc | arj | bz | bz2 | bz3 | cab | cpio | deb | udeb | \
+    gz | jar | tha | lz | lzh | lha | lzma | lzo | rpm | rz | t7z | tar | tbz | \
+    tbz2 | tbz3 | tgz | tlz | txz | tZ | tzo | war | xpi | xz | Z | zip | zipx)
+    handle_archive
     exit 1
     ;;
 
-  ## Audio
+  7z)
+    handle_7zip
+    exit 1
+    ;;
+
+  rar)
+    handle_rar
+    exit 1
+    ;;
+
+  bmp | jpg | jpeg | png | tif | tiff | gif | webp | xpm)
+    handle_image
+    exit 1
+    ;;
+
+  djvu)
+    handle_djvu
+    exit 1
+    ;;
+
+  pdf | epub | xps | cbz | mobi | fb2 | svg)
+    handle_document
+    exit 1
+    ;;
+
+  aac | flac | m4a | mid | midi | mpa | mp2 | mp3 | ogg | wav | wma | aiff | \
+    alac | pcm)
+    handle_audio
+    exit 1
+    ;;
+
+  avi | flv | webm | wma | wmw | m2v | m4a | m4v | mkv | mov | mp4 | mpeg | \
+    mpg | ogv)
+    handle_video
+    exit 1
+    ;;
+
+  ## Log files
+  log)
+    "$EDITOR" "${FILEPATH}"
+    exit 0
+    ;;
+
+  ## Office documents
+  odt | sxw | doc | docx | xls | xlsx | odp | ods | pptx | odg)
+    handle_office_docs
+    exit 1
+    ;;
+
+  md | mkd | markdown)
+    handle_markdown
+    exit 1
+    ;;
+
+  htm | html | xhtml | shtml | xht)
+    handle_html
+    exit 1
+    ;;
+
+  json)
+    handle_json
+    exit 1
+    ;;
+
+  yaml | yml)
+    handle_yaml
+    exit 1
+    ;;
+
+  toml | xml | xbl | xsd | rng | csv)
+    handle_data_format
+    exit 1
+    ;;
+
+  torrent)
+    handle_bittorrent
+    exit 1
+    ;;
+
+  esac
+}
+
+handle_mime() {
+  mimetype="${1}"
+  case "${mimetype}" in
+
+  application/x-archive | application/x-ace | application/x-alz | \
+    application/x-arj | application/x-bzip* | application/vnd.ms-cab-compressed | \
+    application/x-cpio* | application/vnd.debian.binary-package | \
+    application/gzip | application/java-archive | application/x-lzip | \
+    application/x-lha | application/x-lzma | application/x-lzop | \
+    application/x-rpm | application/x-tar | application/x-compressed-tar | \
+    application/x-lzma-compressed-tar | application/x-xz-compressed-tar | \
+    application/x-tzo | application/x-xpinstall | application/x-xz | \
+    application/x-compress | application/zip)
+    handle_archive
+    exit 1
+    ;;
+
+  application/x-7z-compressed)
+    handle_7z
+    exit 1
+    ;;
+
+  application/vnd.rar)
+    handle_rar
+    exit 1
+    ;;
+
+  image/vnd.djvu)
+    handle_djvu
+    exit 1
+    ;;
+
+  image/*)
+    handle_image
+    exit 1
+    ;;
+
+  application/pdf | application/epub+zip | application/xps | application/x-cbz | \
+    application/x-mobipocket-ebook | application/x-fictionbook+html)
+    handle_document
+    exit 1
+    ;;
+
   audio/*)
     handle_audio
     exit 1
@@ -384,143 +625,69 @@ handle_multimedia() {
     exit 1
     ;;
 
-    #     pdftoppm -f 1 -l 1 \
-    #              -scale-to-x "${DEFAULT_SIZE%x*}" \
-    #              -scale-to-y -1 \
-    #              -singlefile \
-    #              -jpeg -tiffcompression jpeg \
-    #              -- "${FPATH}" "${IMAGE_CACHE_PATH%.*}" \
-    #         && exit 6 || exit 1;;
+  application/vnd.oasis.opendocument.* | application/vnd.sun.xml.writer | \
+    application/vnd.openxmlformats-officedocument.*)
+    handle_office_docs
+    exit 1
+    ;;
 
-    ## ePub, MOBI, FB2 (using Calibre)
-    # application/epub+zip|application/x-mobipocket-ebook|\
-    # application/x-fictionbook+xml)
-    #     # ePub (using https://github.com/marianosimone/epub-thumbnailer)
-    #     epub-thumbnailer "${FPATH}" "${IMAGE_CACHE_PATH}" \
-    #         "${DEFAULT_SIZE%x*}" && exit 6
-    #     ebook-meta --get-cover="${IMAGE_CACHE_PATH}" -- "${FPATH}" \
-    #         >/dev/null && exit 6
-    #     exit 1;;
-
-    ## Font
-    # application/font*|application/*opentype)
-    #     preview_png="/tmp/$(basename "${IMAGE_CACHE_PATH%.*}").png"
-    #     if fontimage -o "${preview_png}" \
-    #                  --pixelsize "120" \
-    #                  --fontname \
-    #                  --pixelsize "80" \
-    #                  --text "  ABCDEFGHIJKLMNOPQRSTUVWXYZ  " \
-    #                  --text "  abcdefghijklmnopqrstuvwxyz  " \
-    #                  --text "  0123456789.:,;(*!?') ff fl fi ffi ffl  " \
-    #                  --text "  The quick brown fox jumps over the lazy dog.  " \
-    #                  "${FPATH}";
-    #     then
-    #         convert -- "${preview_png}" "${IMAGE_CACHE_PATH}" \
-    #             && rm -- "${preview_png}" \
-    #             && exit 6
-    #     else
-    #         exit 1
-    #     fi
-    #     ;;
-
-    ## Preview archives using the first image inside.
-    ## (Very useful for comic book collections for example.)
-    # application/zip|application/x-rar|application/x-7z-compressed|\
-    #     application/x-xz|application/x-bzip2|application/x-gzip|application/x-tar)
-    #     local fn=""; local fe=""
-    #     local zip=""; local rar=""; local tar=""; local bsd=""
-    #     case "${mimetype}" in
-    #         application/zip) zip=1 ;;
-    #         application/x-rar) rar=1 ;;
-    #         application/x-7z-compressed) ;;
-    #         *) tar=1 ;;
-    #     esac
-    #     { [ "$tar" ] && fn=$(tar --list --file "${FPATH}"); } || \
-    #     { fn=$(bsdtar --list --file "${FPATH}") && bsd=1 && tar=""; } || \
-    #     { [ "$rar" ] && fn=$(unrar lb -p- -- "${FPATH}"); } || \
-    #     { [ "$zip" ] && fn=$(zipinfo -1 -- "${FPATH}"); } || return
-    #
-    #     fn=$(echo "$fn" | python -c "import sys; import mimetypes as m; \
-    #             [ print(l, end='') for l in sys.stdin if \
-    #               (m.guess_type(l[:-1])[0] or '').startswith('image/') ]" |\
-    #         sort -V | head -n 1)
-    #     [ "$fn" = "" ] && return
-    #     [ "$bsd" ] && fn=$(printf '%b' "$fn")
-    #
-    #     [ "$tar" ] && tar --extract --to-stdout \
-    #         --file "${FPATH}" -- "$fn" > "${IMAGE_CACHE_PATH}" && exit 6
-    #     fe=$(echo -n "$fn" | sed 's/[][*?\]/\\\0/g')
-    #     [ "$bsd" ] && bsdtar --extract --to-stdout \
-    #         --file "${FPATH}" -- "$fe" > "${IMAGE_CACHE_PATH}" && exit 6
-    #     [ "$bsd" ] || [ "$tar" ] && rm -- "${IMAGE_CACHE_PATH}"
-    #     [ "$rar" ] && unrar p -p- -inul -- "${FPATH}" "$fn" > \
-    #         "${IMAGE_CACHE_PATH}" && exit 6
-    #     [ "$zip" ] && unzip -pP "" -- "${FPATH}" "$fe" > \
-    #         "${IMAGE_CACHE_PATH}" && exit 6
-    #     [ "$rar" ] || [ "$zip" ] && rm -- "${IMAGE_CACHE_PATH}"
-    #     ;;
-  esac
-}
-
-handle_mime() {
-  mimetype="${1}"
-  case "${mimetype}" in
   ## Manpages
   text/troff)
-    man -l "${FPATH}"
+    man -l "${FILEPATH}"
     exit 0
+    ;;
+
+  text/markdown)
+    handle_markdown
+    exit 1
+    ;;
+
+  text/html | application/xhtml+xml)
+    handle_html
+    exit 1
+    ;;
+
+  application/json*)
+    handle_json
+    exit 1
+    ;;
+
+  application/yaml)
+    handle_yaml
+    exit 1
+    ;;
+
+  application/toml | */xml | text/csv*)
+    handle_data_format
+    exit 1
     ;;
 
   ## Text
-  text/* | */xml)
-    "$EDITOR" "${FPATH}"
+  text/*)
+    "$EDITOR" "${FILEPATH}"
     exit 0
     ;;
-    ## Syntax highlight
-    # if [[ "$( stat --printf='%s' -- "${FPATH}" )" -gt "${HIGHLIGHT_SIZE_MAX}" ]]; then
-    #     exit 2
-    # fi
-    # if [[ "$( tput colors )" -ge 256 ]]; then
-    #     local pygmentize_format='terminal256'
-    #     local highlight_format='xterm256'
-    # else
-    #     local pygmentize_format='terminal'
-    #     local highlight_format='ansi'
-    # fi
-    # env HIGHLIGHT_OPTIONS="${HIGHLIGHT_OPTIONS}" highlight \
-    #     --out-format="${highlight_format}" \
-    #     --force -- "${FPATH}" && exit 5
-    # pygmentize -f "${pygmentize_format}" -O "style=${PYGMENTIZE_STYLE}"\
-    #     -- "${FPATH}" && exit 5
-    # exit 2;;
 
-  ## DjVu
-  image/vnd.djvu)
-    if type djvutxt >/dev/null 2>&1; then
-      ## Preview as text conversion (requires djvulibre)
-      djvutxt "${FPATH}" | eval "$PAGER"
-      exit 0
-    elif type exiftool >/dev/null 2>&1; then
-      exiftool "${FPATH}" | eval "$PAGER"
-      exit 0
-    fi
+  application/x-bittorrent)
+    handle_bittorrent
     exit 1
     ;;
+
   esac
 }
 
 handle_fallback() {
   if [ "$GUI" -ne 0 ]; then
-    if type xdg-open >/dev/null 2>&1; then
-      nohup xdg-open "${FPATH}" >/dev/null 2>&1 &
+    if command -v xdg-open >/dev/null 2>&1; then
+      nohup xdg-open "${FILEPATH}"
       exit 0
-    elif type open >/dev/null 2>&1; then
-      nohup open "${FPATH}" >/dev/null 2>&1 &
+    elif command -v open >/dev/null 2>&1; then
+      nohup open "${FILEPATH}"
       exit 0
     fi
   fi
 
-  echo '----- File details -----' && file --dereference --brief -- "${FPATH}"
+  echo '----- File details -----' && file --dereference --brief -- "${FILEPATH}"
   exit 1
 }
 
@@ -552,15 +719,15 @@ handle_bin() {
   case "${MIMETYPE}" in
   application/x-executable | application/x-shellscript)
     clear
-    echo '-------- Executable File --------' && file --dereference --brief -- "${FPATH}"
+    echo '-------- Executable File --------' && file --dereference --brief -- "${FILEPATH}"
     printf "Run executable (y/N/'a'rgs)? "
     read -r answer
     case "$answer" in
-    [Yy]*) exec "${FPATH}" ;;
+    [Yy]*) exec "${FILEPATH}" ;;
     [Aa]*)
       printf "args: "
       read -r args
-      exec "${FPATH}" "$args"
+      exec "${FILEPATH}" "$args"
       ;;
     [Nn]*) exit ;;
     esac
@@ -569,10 +736,9 @@ handle_bin() {
 }
 
 handle_extension
-MIMETYPE="$(file -bL --mime-type -- "${FPATH}")"
-handle_multimedia "${MIMETYPE}"
+MIMETYPE="$(file -bL --mime-type -- "${FILEPATH}")"
 handle_mime "${MIMETYPE}"
-[ "$BIN" -ne 0 ] && [ -x "${FPATH}" ] && handle_bin
+[ "$BIN" -ne 0 ] && [ -x "${FILEPATH}" ] && handle_bin
 handle_blocked "${MIMETYPE}"
 handle_fallback
 
