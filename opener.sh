@@ -393,7 +393,7 @@ handle_html() {
 
 handle_markdown() {
   if command -v glow >/dev/null 2>&1; then
-    glow -sdark "${FILEPATH}" | eval "$PAGER"
+    glow -p "${FILEPATH}"
   elif command -v lowdown >/dev/null 2>&1; then
     lowdown -Tterm --term-width="$TERMINAL_COLUMNS" \
       --term-column="$TERMINAL_COLUMNS" "${FILEPATH}" | eval "$PAGER"
