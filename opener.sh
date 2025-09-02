@@ -68,31 +68,6 @@ abspath() {
   esac
 }
 
-# Storing the result to a tmp file is faster than calling listimages twice.
-listimages() {
-  find -L "///${1%/*}" -maxdepth 1 -type f -print0 |
-    grep -izZE '\.(jpe?g|png|gif|webp|tiff|bmp|ico|svg)$' |
-    sort -zV | tee "$tmp"
-}
-
-load_dir() {
-  abspath "$2"
-  tmp="${TMPDIR:-/tmp}/opener_$$"
-  trap 'rm -f -- "$tmp"' EXIT
-  count="$(listimages "$abs_target" | grep -a -m 1 -ZznF "$abs_target" | cut -d: -f1)"
-
-  if [ -n "$count" ]; then
-    if [ "$GUI" -ne 0 ]; then
-      xargs -0 nohup "$1" -n "$count" -- <"$tmp"
-    else
-      xargs -0 "$1" -n "$count" -- <"$tmp"
-    fi
-  else
-    shift
-    "$1" -- "$@" # fallback
-  fi
-}
-
 handle_archive() {
   if command -v tar >/dev/null 2>&1; then
     tar --list --file "${FILEPATH}" | eval "$PAGER"
@@ -145,31 +120,56 @@ t_handle_image() {
   exit 0
 }
 
+# Storing the result to a tmp file is faster than calling listimages twice.
+listimages() {
+  find -L "///${1%/*}" -maxdepth 1 -type f -print0 |
+    grep -izZE '\.(jpe?g|png|gif|webp|tiff|bmp|ico|svg)$' |
+    sort -zV | tee "$tmp"
+}
+
+load_image_dir() {
+  abspath "$2"
+  tmp="${TMPDIR:-/tmp}/opener_$$"
+  trap 'rm -f -- "$tmp"' EXIT
+  count="$(listimages "$abs_target" | grep -a -m 1 -ZznF "$abs_target" | cut -d: -f1)"
+
+  if [ -n "$count" ]; then
+    if [ "$GUI" -ne 0 ]; then
+      devour xargs -0 nohup "$1" -n "$count" -- <"$tmp"
+    else
+      xargs -0 "$1" -n "$count" -- <"$tmp"
+    fi
+  else
+    shift
+    "$1" -- "$@" # fallback
+  fi
+}
+
 handle_image() {
   if [ "$GUI" -ne 0 ]; then
     if command -v nsxiv >/dev/null 2>&1; then
-      devour load_dir nsxiv "${FILEPATH}"
+      load_image_dir nsxiv "${FILEPATH}"
     elif command -v sxiv >/dev/null 2>&1; then
-      devour load_dir sxiv "${FILEPATH}"
+      load_image_dir sxiv "${FILEPATH}"
     elif command -v fim >/dev/null 2>&1; then
-      devour load_dir fim "${FILEPATH}"
-    elif command -v mupdf >/dev/null 2>&1; then
-      devour mupdf "${FILEPATH}"
+      fim "${FILEPATH}"
     elif command -v feh >/dev/null 2>&1; then
-      devour load_dir feh "${FILEPATH}"
+      feh "${FILEPATH}"
     elif command -v imv >/dev/null 2>&1; then
-      devour load_dir imv "${FILEPATH}"
+      load_image_dir imv "${FILEPATH}"
     elif command -v imvr >/dev/null 2>&1; then
-      devour load_dir imvr "${FILEPATH}"
+      load_image_dir imvr "${FILEPATH}"
+    elif command -v mupdf >/dev/null 2>&1; then
+      mupdf "${FILEPATH}"
     else
       t_handle_image
       return
     fi
   else
     if command -v fim >/dev/null 2>&1; then
-      load_dir fim "${FILEPATH}"
+      fim "${FILEPATH}"
     elif command -v fbi >/dev/null 2>&1; then
-      load_dir fbi "${FILEPATH}"
+      fbi "${FILEPATH}"
     elif command -v fbvis >/dev/null 2>&1; then
       fbvis "${FILEPATH}"
     elif command -v fbv >/dev/null 2>&1; then
