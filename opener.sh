@@ -60,11 +60,11 @@ TERMINAL_FONT_HEIGHT=10
 TERMINAL_WIDTH=$(($TERMINAL_COLUMNS * $TERMINAL_FONT_WIDTH))
 TERMINAL_HEIGHT=$(($TERMINAL_LINES * $TERMINAL_FONT_HEIGHT))
 
-# Sets the variable abs_target, this should be faster than calling printf.
-abspath() {
+# Sets the variable absolute_path_target, this should be faster than calling printf.
+absolute_path() {
   case "$1" in
-  /*) abs_target="$1" ;;
-  *) abs_target="$PWD/$1" ;;
+  /*) absolute_path_target="$1" ;;
+  *) absolute_path_target="$PWD/$1" ;;
   esac
 }
 
@@ -120,18 +120,19 @@ t_handle_image() {
   exit 0
 }
 
-# Storing the result to a tmp file is faster than calling listimages twice.
-listimages() {
+# Storing the result to a tmp file is faster than calling list_images twice.
+list_images() {
   find -L "///${1%/*}" -maxdepth 1 -type f -print0 |
-    grep -izZE '\.(jpe?g|png|gif|webp|tiff|bmp|ico|svg)$' |
+    grep -izZE '\.(jpe?g|png|gif|webp|tiff?|bmp|ico|svg|webp|xpm)$' |
     sort -zV | tee "$tmp"
 }
 
 load_image_dir() {
-  abspath "$2"
+  absolute_path "$2"
   tmp="${TMPDIR:-/tmp}/opener_$$"
   trap 'rm -f -- "$tmp"' EXIT
-  count="$(listimages "$abs_target" | grep -a -m 1 -ZznF "$abs_target" | cut -d: -f1)"
+  count="$(list_images "$absolute_path_target" |
+    grep -a -m 1 -ZznF "$absolute_path_target" | cut -d: -f1)"
 
   if [ -n "$count" ]; then
     if [ "$GUI" -ne 0 ]; then
@@ -152,15 +153,15 @@ handle_image() {
     elif command -v sxiv >/dev/null 2>&1; then
       load_image_dir sxiv "${FILEPATH}"
     elif command -v fim >/dev/null 2>&1; then
-      fim "${FILEPATH}"
+      devour fim "${FILEPATH}"
     elif command -v feh >/dev/null 2>&1; then
-      feh "${FILEPATH}"
+      devour feh "${FILEPATH}"
     elif command -v imv >/dev/null 2>&1; then
       load_image_dir imv "${FILEPATH}"
     elif command -v imvr >/dev/null 2>&1; then
       load_image_dir imvr "${FILEPATH}"
     elif command -v mupdf >/dev/null 2>&1; then
-      mupdf "${FILEPATH}"
+      devour mupdf "${FILEPATH}"
     else
       t_handle_image
       return
@@ -176,6 +177,43 @@ handle_image() {
       fbv "${FILEPATH}"
     elif command -v fbpdf >/dev/null 2>&1; then
       fbpdf "${FILEPATH}"
+    else
+      t_handle_image
+      return
+    fi
+  fi
+  exit 0
+}
+
+handle_svg() {
+  if [ "$GUI" -ne 0 ]; then
+    if command -v nsxiv >/dev/null 2>&1; then
+      load_image_dir nsxiv "${FILEPATH}"
+    elif command -v sxiv >/dev/null 2>&1; then
+      load_image_dir sxiv "${FILEPATH}"
+    elif command -v feh >/dev/null 2>&1; then
+      devour feh "${FILEPATH}"
+    elif command -v imv >/dev/null 2>&1; then
+      load_image_dir imv "${FILEPATH}"
+    elif command -v imvr >/dev/null 2>&1; then
+      load_image_dir imvr "${FILEPATH}"
+    elif command -v mupdf >/dev/null 2>&1; then
+      devour mupdf "${FILEPATH}"
+    elif command -v inkscape >/dev/null 2>&1; then
+      devour inkscape "${FILEPATH}"
+    else
+      t_handle_image
+      return
+    fi
+  else
+    if command -v fbpdf >/dev/null 2>&1; then
+      fbpdf "${FILEPATH}"
+    elif command -v fbi >/dev/null 2>&1; then
+      fbi "${FILEPATH}"
+    elif command -v fbvis >/dev/null 2>&1; then
+      fbvis "${FILEPATH}"
+    elif command -v fbv >/dev/null 2>&1; then
+      fbv "${FILEPATH}"
     else
       t_handle_image
       return
@@ -499,17 +537,22 @@ handle_extension() {
     exit 1
     ;;
 
-  bmp | jpg | jpeg | png | tif | tiff | gif | webp | xpm)
+  bmp | jpg | jpeg | png | tif | tiff | gif | ico | webp | xpm)
     handle_image
     exit 1
     ;;
 
-  djvu)
+  svg)
+    handle_svg
+    exit 1
+    ;;
+
+  djvu | djv)
     handle_djvu
     exit 1
     ;;
 
-  pdf | epub | xps | cbz | mobi | fb2 | svg)
+  pdf | epub | xps | cbz | mobi | fb2)
     handle_document
     exit 1
     ;;
@@ -598,8 +641,13 @@ handle_mime() {
     exit 1
     ;;
 
-  image/vnd.djvu)
+  image/vnd.djvu*)
     handle_djvu
+    exit 1
+    ;;
+
+  image/svg+xml)
+    handle_svg
     exit 1
     ;;
 
