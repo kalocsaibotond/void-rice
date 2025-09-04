@@ -185,6 +185,18 @@ handle_image() {
   exit 0
 }
 
+handle_gimp_image() {
+  if [ "$GUI" -ne 0 ]; then
+    if command -v gimp >/dev/null 2>&1; then
+      devour gimp "${FILEPATH}"
+    else
+      return
+    fi
+  else
+    return
+  fi
+  exit 0
+}
 handle_svg() {
   if [ "$GUI" -ne 0 ]; then
     if command -v nsxiv >/dev/null 2>&1; then
@@ -716,6 +728,11 @@ handle_extension() {
     exit 1
     ;;
 
+  xcf)
+    handle_gimp_image
+    exit 1
+    ;;
+
   svg)
     handle_svg
     exit 1
@@ -852,6 +869,11 @@ handle_mime() {
 
   image/svg+xml)
     handle_svg
+    exit 1
+    ;;
+
+  image/x-xcf)
+    handle_gimp_image
     exit 1
     ;;
 
