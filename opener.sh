@@ -257,7 +257,7 @@ handle_djvu() {
   exit 0
 }
 
-t_handle_document() {
+t_handle_pdf() {
   if command -v mutool >/dev/null 2>&1; then
     mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
   elif [ "pdf" = "${EXTENSION}" ] && command -v pdftotext >/dev/null 2>&1; then
@@ -270,21 +270,189 @@ t_handle_document() {
   exit 0
 }
 
-handle_document() {
+handle_pdf() {
   if [ "$GUI" -ne 0 ]; then
-    if command -v mupdf >/dev/null 2>&1; then
+    if command -v zathura >/dev/null 2>&1; then
+      devour zathura "${FILEPATH}"
+    elif command -v mupdf >/dev/null 2>&1; then
       devour mupdf "${FILEPATH}"
     else
-      t_handle_document
+      t_handle_pdf
       return
     fi
   else
     if command -v fbpdf >/dev/null 2>&1; then
       fbpdf "${FILEPATH}"
     else
-      t_handle_document
+      t_handle_pdf
       return
     fi
+  fi
+  exit 0
+}
+
+t_handle_epub() {
+  if command -v mutool >/dev/null 2>&1; then
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+  elif command -v exiftool >/dev/null 2>&1; then
+    exiftool "${FILEPATH}" | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_epub() {
+  # NOTE: Electronic book document.
+  if [ "$GUI" -ne 0 ]; then
+    if command -v zathura >/dev/null 2>&1; then
+      devour zathura "${FILEPATH}"
+    elif command -v mupdf >/dev/null 2>&1; then
+      devour mupdf "${FILEPATH}"
+    else
+      t_handle_epub
+      return
+    fi
+  else
+    if command -v fbpdf >/dev/null 2>&1; then
+      fbpdf "${FILEPATH}"
+    else
+      t_handle_epub
+      return
+    fi
+  fi
+  exit 0
+}
+
+t_handle_xps() {
+  if command -v mutool >/dev/null 2>&1; then
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_xps() {
+  if [ "$GUI" -ne 0 ]; then
+    if command -v zathura >/dev/null 2>&1; then
+      devour zathura "${FILEPATH}"
+    elif command -v mupdf >/dev/null 2>&1; then
+      devour mupdf "${FILEPATH}"
+    else
+      t_handle_xps
+      return
+    fi
+  else
+    if command -v fbpdf >/dev/null 2>&1; then
+      fbpdf "${FILEPATH}"
+    else
+      t_handle_xps
+      return
+    fi
+  fi
+  exit 0
+}
+
+t_handle_comic_book() {
+  if command -v mutool >/dev/null 2>&1; then
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_comic_book() {
+  # NOTE: Comic book archive.
+  if [ "$GUI" -ne 0 ]; then
+    if command -v zathura >/dev/null 2>&1; then
+      devour zathura "${FILEPATH}"
+    elif command -v mupdf >/dev/null 2>&1; then
+      devour mupdf "${FILEPATH}"
+    else
+      t_handle_comic_book
+      return
+    fi
+  else
+    if command -v fbpdf >/dev/null 2>&1; then
+      fbpdf "${FILEPATH}"
+    else
+      t_handle_comic_book
+      return
+    fi
+  fi
+  exit 0
+}
+
+t_handle_mobi() {
+  if command -v mutool >/dev/null 2>&1; then
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_mobi() {
+  # NOTE: Mobipocket e-book. Kindle e-book is its subclass.
+  if [ "$GUI" -ne 0 ]; then
+    if command -v mupdf >/dev/null 2>&1; then
+      devour mupdf "${FILEPATH}"
+    else
+      t_handle_mobi
+      return
+    fi
+  else
+    if command -v fbpdf >/dev/null 2>&1; then
+      fbpdf "${FILEPATH}"
+    else
+      t_handle_mobi
+      return
+    fi
+  fi
+  exit 0
+}
+
+t_handle_fictionbook() {
+  if command -v mutool >/dev/null 2>&1; then
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+  else
+    return
+  fi
+  exit 0
+}
+
+handle_fictionbook() {
+  # NOTE: FictionBook document.
+  if [ "$GUI" -ne 0 ]; then
+    if command -v mupdf >/dev/null 2>&1; then
+      devour mupdf "${FILEPATH}"
+    else
+      t_handle_fictionbook
+      return
+    fi
+  else
+    if command -v fbpdf >/dev/null 2>&1; then
+      fbpdf "${FILEPATH}"
+    else
+      t_handle_fictionbook
+      return
+    fi
+  fi
+  exit 0
+}
+
+handle_postscript() {
+  # NOTE: PostScript document.
+  if [ "$GUI" -ne 0 ]; then
+    if command -v zathura >/dev/null 2>&1; then
+      devour zathura "${FILEPATH}"
+    else
+      return
+    fi
+  else
+    return
   fi
   exit 0
 }
@@ -418,13 +586,19 @@ handle_html() {
       devour surf "${FILEPATH}"
     elif command -v netsurf >/dev/null 2>&1; then
       devour netsurf "${FILEPATH}"
+    elif command -v mupdf >/dev/null 2>&1; then
+      devour mupdf "${FILEPATH}"
     else
       t_handle_html
       return
     fi
   else
-    t_handle_html
-    return
+    if command -v fbpdf >/dev/null 2>&1; then
+      fbpdf "${FILEPATH}"
+    else
+      t_handle_html
+      return
+    fi
   fi
   exit 0
 }
@@ -552,8 +726,38 @@ handle_extension() {
     exit 1
     ;;
 
-  pdf | epub | xps | cbz | mobi | fb2)
-    handle_document
+  pdf)
+    handle_pdf
+    exit 1
+    ;;
+
+  epub)
+    handle_epub
+    exit 1
+    ;;
+
+  oxps | xps)
+    handle_xps
+    exit 1
+    ;;
+
+  cbt | cbz | cbr | cb7)
+    handle_comic_book
+    exit 1
+    ;;
+
+  mobi | azw3 | kfx)
+    handle_mobi
+    exit 1
+    ;;
+
+  fb2)
+    handle_fictionbook
+    exit 1
+    ;;
+
+  ps)
+    handle_postscript
     exit 1
     ;;
 
@@ -656,9 +860,37 @@ handle_mime() {
     exit 1
     ;;
 
-  application/pdf | application/epub+zip | application/xps | application/x-cbz | \
-    application/x-mobipocket-ebook | application/x-fictionbook+html)
-    handle_document
+  application/pdf)
+    handle_pdf
+    exit 1
+    ;;
+
+  application/epub+zip)
+    handle_epub
+    exit 1
+    ;;
+  application/oxps | application/xps)
+    handle_xps
+    exit 1
+    ;;
+
+  application/x-cb* | appication/vnd.comicbook*)
+    handle_comic_book
+    exit 1
+    ;;
+
+  application/x-mobipocket-ebook | application/vnd.amazon.mobi8-ebook)
+    handle_mobi
+    exit 1
+    ;;
+
+  application/x-fictionbook+html)
+    handle_fictionbook
+    exit 1
+    ;;
+
+  application/postscript)
+    handle_postscript
     exit 1
     ;;
 
