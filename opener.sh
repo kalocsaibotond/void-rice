@@ -70,11 +70,11 @@ absolute_path() {
 
 handle_archive() {
   if command -v tar >/dev/null 2>&1; then
-    tar --list --file "${FILEPATH}" | eval "$PAGER"
+    tar --list --file "${FILEPATH}" | $PAGER
   elif command -v bsdtar >/dev/null 2>&1; then
-    bsdtar --list --file "${FILEPATH}" | eval "$PAGER"
+    bsdtar --list --file "${FILEPATH}" | $PAGER
   elif command -v atool >/dev/null 2>&1; then
-    atool --list -- "${FILEPATH}" | eval "$PAGER"
+    atool --list -- "${FILEPATH}" | $PAGER
   else
     return
   fi
@@ -84,7 +84,7 @@ handle_archive() {
 handle_7zip() {
   if command -v 7z >/dev/null 2>&1; then
     ## Avoid password prompt by providing empty password
-    7z l -p -- "${FILEPATH}" | eval "$PAGER"
+    7z l -p -- "${FILEPATH}" | $PAGER
   else
     return
   fi
@@ -94,10 +94,10 @@ handle_7zip() {
 handle_rar() {
   if command -v unrar >/dev/null 2>&1; then
     ## Avoid password prompt by providing empty password
-    unrar lt -p- -- "${FILEPATH}" | eval "$PAGER"
+    unrar lt -p- -- "${FILEPATH}" | $PAGER
   elif command -v 7z >/dev/null 2>&1; then
     ## Avoid password prompt by providing empty password
-    7z l -p -- "${FILEPATH}" | eval "$PAGER"
+    7z l -p -- "${FILEPATH}" | $PAGER
   else
     return
   fi
@@ -109,11 +109,11 @@ t_handle_image() {
     echo "0;1;0;0;${TERMINAL_WIDTH};${TERMINAL_HEIGHT};;;;;${FILEPATH}
 3;" | w3mimgdisplay
   elif command -v viu >/dev/null 2>&1; then
-    viu -n "${FILEPATH}" | eval "$PAGER"
+    viu -n "${FILEPATH}" | $PAGER
   elif command -v img2txt >/dev/null 2>&1; then
-    img2txt --gamma=0.6 -- "${FILEPATH}" | eval "$PAGER"
+    img2txt --gamma=0.6 -- "${FILEPATH}" | $PAGER
   elif command -v exiftool >/dev/null 2>&1; then
-    exiftool "${FILEPATH}" | eval "$PAGER"
+    exiftool "${FILEPATH}" | $PAGER
   else
     return
   fi
@@ -237,9 +237,9 @@ handle_svg() {
 t_handle_djvu() {
   if command -v djvutxt >/dev/null 2>&1; then
     ## Preview as text conversion (requires djvulibre)
-    djvutxt "${FILEPATH}" | eval "$PAGER"
+    djvutxt "${FILEPATH}" | $PAGER
   elif command -v exiftool >/dev/null 2>&1; then
-    exiftool "${FILEPATH}" | eval "$PAGER"
+    exiftool "${FILEPATH}" | $PAGER
   else
     return
   fi
@@ -271,11 +271,11 @@ handle_djvu() {
 
 t_handle_pdf() {
   if command -v mutool >/dev/null 2>&1; then
-    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | $PAGER
   elif [ "pdf" = "${EXTENSION}" ] && command -v pdftotext >/dev/null 2>&1; then
-    pdftotext -l 10 -nopgbrk -q -- "${FILEPATH}" - | eval "$PAGER"
+    pdftotext -l 10 -nopgbrk -q -- "${FILEPATH}" - | $PAGER
   elif command -v exiftool >/dev/null 2>&1; then
-    exiftool "${FILEPATH}" | eval "$PAGER"
+    exiftool "${FILEPATH}" | $PAGER
   else
     return
   fi
@@ -305,9 +305,9 @@ handle_pdf() {
 
 t_handle_epub() {
   if command -v mutool >/dev/null 2>&1; then
-    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | $PAGER
   elif command -v exiftool >/dev/null 2>&1; then
-    exiftool "${FILEPATH}" | eval "$PAGER"
+    exiftool "${FILEPATH}" | $PAGER
   else
     return
   fi
@@ -338,7 +338,7 @@ handle_epub() {
 
 t_handle_xps() {
   if command -v mutool >/dev/null 2>&1; then
-    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | $PAGER
   else
     return
   fi
@@ -368,7 +368,7 @@ handle_xps() {
 
 t_handle_comic_book() {
   if command -v mutool >/dev/null 2>&1; then
-    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | $PAGER
   else
     return
   fi
@@ -399,7 +399,7 @@ handle_comic_book() {
 
 t_handle_mobi() {
   if command -v mutool >/dev/null 2>&1; then
-    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | $PAGER
   else
     return
   fi
@@ -428,7 +428,7 @@ handle_mobi() {
 
 t_handle_fictionbook() {
   if command -v mutool >/dev/null 2>&1; then
-    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | eval "$PAGER"
+    mutool draw -F txt -i -- "${FILEPATH}" 1-10 | $PAGER
   else
     return
   fi
@@ -487,9 +487,9 @@ handle_audio() {
   elif command -v media_client >/dev/null 2>&1; then
     media_client play "${FILEPATH}"
   elif command -v mediainfo >/dev/null 2>&1; then
-    mediainfo "${FILEPATH}" | eval "$PAGER"
+    mediainfo "${FILEPATH}" | $PAGER
   elif command -v exiftool >/dev/null 2>&1; then
-    exiftool "${FILEPATH}" | eval "$PAGER"
+    exiftool "${FILEPATH}" | $PAGER
   else
     return
   fi
@@ -509,11 +509,11 @@ t_handle_video() {
     # Thumbnail
     [ -d "${IMAGE_CACHE_PATH}" ] || mkdir "${IMAGE_CACHE_PATH}"
     ffmpegthumbnailer -i "${FILEPATH}" -o "${IMAGE_CACHE_PATH}/${FILENAME}.jpg" -s 0
-    viu -n "${IMAGE_CACHE_PATH}/${FILENAME}.jpg" | eval "$PAGER"
+    viu -n "${IMAGE_CACHE_PATH}/${FILENAME}.jpg" | $PAGER
   elif command -v mediainfo >/dev/null 2>&1; then
-    mediainfo "${FILEPATH}" | eval "$PAGER"
+    mediainfo "${FILEPATH}" | $PAGER
   elif command -v exiftool >/dev/null 2>&1; then
-    exiftool "${FILEPATH}" | eval "$PAGER"
+    exiftool "${FILEPATH}" | $PAGER
   else
     return
   fi
@@ -548,10 +548,10 @@ handle_video() {
 t_handle_office_docs() {
   if command -v soffice >/dev/null 2>&1; then
     ## Preview as text conversion
-    soffice --cat "${FILEPATH}" | eval "$PAGER"
+    soffice --cat "${FILEPATH}" | $PAGER
   elif command -v odt2txt >/dev/null 2>&1; then
     ## Preview as text conversion
-    odt2txt "${FILEPATH}" | eval "$PAGER"
+    odt2txt "${FILEPATH}" | $PAGER
   else
     return
   fi
@@ -583,9 +583,9 @@ t_handle_html() {
   elif command -v bat >/dev/null 2>&1; then
     bat "${FILEPATH}"
   elif command -v "$PAGER" >/dev/null 2>&1; then
-    "$PAGER" "${FILEPATH}"
+    $PAGER "${FILEPATH}"
   elif command -v "$EDITOR" >/dev/null 2>&1; then
-    "$EDITOR" "${FILEPATH}"
+    $EDITOR "${FILEPATH}"
   else
     return
   fi
@@ -620,13 +620,13 @@ handle_markdown() {
     glow -p "${FILEPATH}"
   elif command -v lowdown >/dev/null 2>&1; then
     lowdown -Tterm --term-width="$TERMINAL_COLUMNS" \
-      --term-column="$TERMINAL_COLUMNS" "${FILEPATH}" | eval "$PAGER"
+      --term-column="$TERMINAL_COLUMNS" "${FILEPATH}" | $PAGER
   elif command -v bat >/dev/null 2>&1; then
     bat "${FILEPATH}"
   elif command -v "$PAGER" >/dev/null 2>&1; then
-    "$PAGER" "${FILEPATH}"
+    $PAGER "${FILEPATH}"
   elif command -v "$EDITOR" >/dev/null 2>&1; then
-    "$EDITOR" "${FILEPATH}"
+    $EDITOR "${FILEPATH}"
   else
     return
   fi
@@ -637,17 +637,17 @@ handle_json() {
   if command -v fx >/dev/null 2>&1; then
     fx "${FILEPATH}"
   elif command -v dasel >/dev/null 2>&1; then
-    dasel --pretty --colour -f "${FILEPATH}" | eval "$PAGER"
+    dasel --pretty --colour -f "${FILEPATH}" | $PAGER
   elif command -v jq >/dev/null 2>&1; then
-    jq --color-output . "${FILEPATH}" | eval "$PAGER"
+    jq --color-output . "${FILEPATH}" | $PAGER
   elif command -v bat >/dev/null 2>&1; then
     bat "${FILEPATH}"
   elif command -v "$PAGER" >/dev/null 2>&1; then
-    "$PAGER" "${FILEPATH}"
+    $PAGER "${FILEPATH}"
   elif command -v "$EDITOR" >/dev/null 2>&1; then
-    "$EDITOR" "${FILEPATH}"
+    $EDITOR "${FILEPATH}"
   elif command -v python >/dev/null 2>&1; then
-    python -m json.tool -- "${FILEPATH}" | eval "$PAGER"
+    python -m json.tool -- "${FILEPATH}" | $PAGER
   else
     return
   fi
@@ -658,15 +658,15 @@ handle_yaml() {
   if command -v fx >/dev/null 2>&1; then
     fx "${FILEPATH}"
   elif command -v dasel >/dev/null 2>&1; then
-    dasel --pretty --colour -f "${FILEPATH}" | eval "$PAGER"
+    dasel --pretty --colour -f "${FILEPATH}" | $PAGER
   elif command -v yq >/dev/null 2>&1; then
-    yq --color-output . "${FILEPATH}" | eval "$PAGER"
+    yq --color-output . "${FILEPATH}" | $PAGER
   elif command -v bat >/dev/null 2>&1; then
     bat "${FILEPATH}"
   elif command -v "$PAGER" >/dev/null 2>&1; then
-    "$PAGER" "${FILEPATH}"
+    $PAGER "${FILEPATH}"
   elif command -v "$EDITOR" >/dev/null 2>&1; then
-    "$EDITOR" "${FILEPATH}"
+    $EDITOR "${FILEPATH}"
   else
     return
   fi
@@ -675,15 +675,15 @@ handle_yaml() {
 
 handle_data_format() {
   if command -v dasel >/dev/null 2>&1; then
-    dasel --pretty --colour -f "${FILEPATH}" | eval "$PAGER"
+    dasel --pretty --colour -f "${FILEPATH}" | $PAGER
   elif command -v jq >/dev/null 2>&1; then
-    yq --color-output . "${FILEPATH}" | eval "$PAGER"
+    yq --color-output . "${FILEPATH}" | $PAGER
   elif command -v bat >/dev/null 2>&1; then
     bat "${FILEPATH}"
   elif command -v "$PAGER" >/dev/null 2>&1; then
-    "$PAGER" "${FILEPATH}"
+    $PAGER "${FILEPATH}"
   elif command -v "$EDITOR" >/dev/null 2>&1; then
-    "$EDITOR" "${FILEPATH}"
+    $EDITOR "${FILEPATH}"
   else
     return
   fi
@@ -692,7 +692,7 @@ handle_data_format() {
 
 handle_bittorrent() {
   if command -v btinfo >/dev/null 2>&1; then
-    btinfo "${FILEPATH}" | eval "$PAGER"
+    btinfo "${FILEPATH}" | $PAGER
   elif command -v rtorrent >/dev/null 2>&1; then
     rtorrent "${FILEPATH}"
   elif command -v transmission-show >/dev/null 2>&1; then
@@ -792,7 +792,7 @@ handle_extension() {
 
   ## Log files
   log)
-    "$EDITOR" "${FILEPATH}"
+    $EDITOR "${FILEPATH}"
     exit 0
     ;;
 
@@ -966,7 +966,7 @@ handle_mime() {
 
   ## Text
   text/*)
-    "$EDITOR" "${FILEPATH}"
+    $EDITOR "${FILEPATH}"
     exit 0
     ;;
 
