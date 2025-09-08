@@ -707,8 +707,9 @@ handle_extension() {
   case "${EXTENSION}" in
 
   a | ar | ace | alz | arc | arj | bz | bz2 | bz3 | cab | cpio | deb | udeb | \
-    gz | jar | tha | lz | lzh | lha | lzma | lzo | rpm | rz | t7z | tar | tbz | \
-    tbz2 | tbz3 | tgz | tlz | txz | tZ | tzo | war | xpi | xz | Z | zip | zipx)
+    xbps | gz | jar | tha | lz | lzh | lha | lzma | lzo | rpm | rz | t7z | \
+    tar | tbz | tbz2 | tbz3 | tgz | tlz | txz | tZ | tzo | war | xpi | xz | \
+    Z | zip | zipx)
     handle_archive
     exit 1
     ;;
