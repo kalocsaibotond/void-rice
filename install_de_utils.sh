@@ -5,8 +5,11 @@ if [ "$1" ]; then
   export GIT_SSL_NO_VERIFY=true
   export WGETRC="$(pwd)/.wgetrc"
   export CURL_HOME="$(pwd)"
-  env_vars= \
-    '--preserve-env=SSL_NO_VERIFY_PEER,GIT_SSL_NO_VERIFY,WGETRC,CURL_HOME'
+  env_vars='--preserve-env='
+  env_vars="$env_vars"'SSL_NO_VERIFY_PEER,'
+  env_vars="$env_vars"'GIT_SSL_NO_VERIFY,'
+  env_vars="$env_vars"'WGETRC,'
+  env_vars="$env_vars"'CURL_HOME'
 else
   env_vars=''
 fi
