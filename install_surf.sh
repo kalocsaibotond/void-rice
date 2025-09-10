@@ -54,6 +54,14 @@ echo 'set number
 .
 xit' | sudo ex config.h
 
+echo 'set number
+/uri/ append
+
+if ! [ -d $(dirname $xidfile) ]; then
+	mkdir -p $(dirname $xidfile)
+fi
+.
+xit' | sudo ex surf-open.sh
 sudo ln -sf $(pwd)/surf-open.sh /usr/local/bin/tsurf
 
 sudo git add -A
