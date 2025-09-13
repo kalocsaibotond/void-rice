@@ -1,4 +1,5 @@
 #!/bin/sh
+# It needs curl for installation.
 
 if [ "$1" ]; then
   export GIT_SSL_NO_VERIFY=true
@@ -14,13 +15,16 @@ fi
 
 printf "\nInstalling Linuxbrew.\n\n"
 
-sudo useradd -r -m -s $(command -v nologin) -d /home/linuxbrew linuxbrew
+sudo useradd -m linuxbrew
+
+echo "Give password for the linuxbrew manager user account:"
+sudo passwd linuxbrew
 
 sudo --preserve-env $env_vars -u linuxbrew \
   HOME=/home/linuxbrew NONINTERACTIVE=1 bash -c \
   "$(wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-sudo chmod -R o+rwx /home/linuxbrew
+sudo chmod -R o+rx /home/linuxbrew
 
 printf "\nSetting up Linuxbrew:\n\n"
 brew_init='eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
