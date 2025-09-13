@@ -20,30 +20,13 @@ printf "\nIinstalling general utilites of the desktop environment:\n\n"
 sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_util_deps.txt)
 
 ./install_nnn.sh $1
-
-# Backup package managers.
-####################################
-printf "\nInstalling Linuxbrew.\n\n"
-####################################
-mkdir -p $HOME/.cache/Homebrew
-NONINTERACTIVE=1 bash -c \
-  "$(wget -O - https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+./install_brew.sh $1
 
 #########################################################
 printf "\nSetting up flatpak (needs reboot to work).\n\n"
 #########################################################
 sudo $env_vars flatpak remote-add --if-not-exists flathub \
   https://flathub.org/repo/flathub.flatpakrepo
-
-####################################
-printf "\nSetting up Linuxbrew:\n\n"
-####################################
-brew_init='eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
-if ! grep -q "$brew_init" /etc/profile.d/*; then
-  echo "$brew_init" >linuxbrew-initialisation.sh
-  chmod o+rx linuxbrew-initialisation.sh
-  sudo mv linuxbrew-initialisation.sh /etc/profile.d/
-fi
 
 ########################################
 printf "\nSet XDG default applications."
