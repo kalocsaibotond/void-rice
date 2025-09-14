@@ -51,14 +51,12 @@ printf "\nSetting up, system-wide Xorg configuration:\n\n"
 ##########################################################
 
 printf "\nSetting Xorg keyboard config and Esc - Caps Lock swap.\n\n"
-xorg_keyboard_config='
-Section "InputClass"
+xorg_keyboard_config='Section "InputClass"
   Identifier "system-keyboard"
   MatchIsKeyboard "on"
   Option "XkbLayout" "hu"
   Option "XkbOptions" "caps:swapescape"
-EndSection
-' # I usually work on hungarian keyboards with esc - caps lock swapped.
+EndSection' # I usually work on hungarian keyboards with esc - caps lock swapped.
 if ! grep -q '"XkbLayout"' /etc/X11/xorg.conf.d/*; then
   echo "$xorg_keyboard_config" >00-keyboard.conf
   chmod o+rx 00-keyboard.conf
