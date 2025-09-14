@@ -55,6 +55,7 @@ ffmpeg
 
 ctags
 tree-sitter-devel
+python3-neovim
 neovim
 
 # Network management
