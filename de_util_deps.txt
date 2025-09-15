@@ -3,9 +3,12 @@
 ####################
 readline-devel # It is needed for building nnn.
 
-########################
+#########################
 # Terminal workflow tools
-########################
+#########################
+
+# Wifi
+iwd
 
 # Power management
 tlp  # I use laptops.

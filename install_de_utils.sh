@@ -21,16 +21,12 @@ sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_util_deps.txt)
 
 ./install_nnn.sh $1
 
-#########################################################
-printf "\nSetting up flatpak (needs reboot to work).\n\n"
-#########################################################
-sudo $env_vars flatpak remote-add --if-not-exists flathub \
-  https://flathub.org/repo/flathub.flatpakrepo
-
-########################################
-printf "\nSet XDG default applications."
-########################################
-sudo ln -sf $(pwd)/mimeapps.list /etc/xdg
+##############################
+printf "\nSetting up IWD.\n\n"
+##############################
+sudo rm /var/service/wpa_supplicant
+sudo ln -sf /etc/sv/dbus /var/service
+sudo ln -sf /etc/sv/iwd /var/service
 
 ##############################
 printf "\nSetting up TLP.\n\n"
@@ -42,6 +38,17 @@ printf "\nSetting up CUPS.\n\n"
 ###############################
 sudo touch /etc/sv/cupsd/down # Rarely, I have to print documents.
 sudo ln -sf /etc/sv/cupsd /var/service
+
+########################################
+printf "\nSet XDG default applications."
+########################################
+sudo ln -sf $(pwd)/mimeapps.list /etc/xdg
+
+#########################################################
+printf "\nSetting up flatpak (needs reboot to work).\n\n"
+#########################################################
+sudo $env_vars flatpak remote-add --if-not-exists flathub \
+  https://flathub.org/repo/flathub.flatpakrepo
 
 #################################
 printf "\nSetting up Zoxide.\n\n"
