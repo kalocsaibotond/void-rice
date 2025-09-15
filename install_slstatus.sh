@@ -19,7 +19,7 @@ echo 'set number
 /function format
 +
 .,. change
-	{ battery_perc, "bat: %s,",   "BAT0" },
+	{ battery_perc, "bat: %s%%,",   "BAT1" },
 	{ keymap, " kb: %s,",         NULL },
 	{ datetime, " %s",            "%F %T" },
 .
