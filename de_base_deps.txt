@@ -8,6 +8,7 @@ libXinerama-devel  # For dwm
 libwebkit2gtk41-devel  # For surf.
 gcr-devel  # For surf
 git-netrc  # It only implements the get interface, needs an ~/.netrc(.gpg) file.
+libevdev-devel # For hkd.
 wget
 
 ###############################
@@ -40,6 +41,7 @@ tmux  # It has true color, proper mouse support and performant rendering.
 reptyr
 physlock
 gpm
+alsa-utils
 
 w3m
 w3m-img  # Needed for image support in w3m console browser

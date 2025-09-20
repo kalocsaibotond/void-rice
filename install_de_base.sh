@@ -45,6 +45,7 @@ printf "\nSystem-wide, from source, local installation of basic utilites:\n\n"
 
 # Console utilites
 ./install_sfm.sh $1
+./install_hkd.sh $1
 
 ##########################################################
 printf "\nSetting up, system-wide Xorg configuration:\n\n"
@@ -117,6 +118,9 @@ fi
 printf "\nConfiguring gpm to not start at boot:\n\n"
 sudo touch /etc/sv/gpm/down # I dont want it to start at boot
 sudo ln -sf /etc/sv/gpm /var/service
+
+printf "\nConfiguring alsa:\n\n"
+sudo ln -sf /etc/sv/alsa /var/service
 
 printf "\nSetting up interactive POSIX shell startup file /etc/shrc .\n\n"
 sys_shrc='# Only apply in interactive shell sessions
