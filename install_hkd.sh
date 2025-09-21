@@ -46,3 +46,28 @@ exec /usr/local/bin/hkd $keyboards > /dev/null' >run
 fi
 
 sudo ln -sf /etc/sv/hkd /var/service
+
+printf "\nCreating udev rule for restarting when new keyboard is connected.\n\n"
+
+if ! [ -f /etc/udev/rules.d/99-restart-hkd.rules ]; then
+  echo '#!/bin/sh
+if sv status hkd | grep -q "^run"; then
+  sv restart hkd > /dev/null
+fi' >restart-hkd.sh
+  chmod o+rx restart-hkd.sh
+
+  # TODO: Create more precise rule that only triggers for keyboards.
+  restart_hkd_rule=''
+  restart_hkd_rule="$restart_hkd_rule"'ACTION=="add", '
+  restart_hkd_rule="$restart_hkd_rule"'SUBSYSTEM=="input", '
+  restart_hkd_rule="$restart_hkd_rule"'SUBSYSTEMS=="usb", '
+  restart_hkd_rule="$restart_hkd_rule"'ENV{ID_INPUT_KEYBOARD}=="1", '
+  restart_hkd_rule="$restart_hkd_rule"'RUN+="/etc/udev/restart-hkd.sh"'
+  echo $restart_hkd_rule >99-restart-hkd.rules
+  chmod o+rx 99-restart-hkd.rules
+
+  sudo mkdir -p /etc/udev/rules.d
+
+  sudo mv restart-hkd.sh /etc/udev/
+  sudo mv 99-restart-hkd.rules /etc/udev/rules.d
+fi
