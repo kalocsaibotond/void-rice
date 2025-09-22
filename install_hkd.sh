@@ -56,12 +56,16 @@ if sv status hkd | grep -q "^run"; then
 fi' >restart-hkd.sh
   chmod o+rx restart-hkd.sh
 
-  # TODO: Create more precise rule that only triggers for keyboards.
+  # NOTE: This rule is inspired from the by-path link rules of Void linux's
+  # /lib/udev/rules.d/60-persistent-input.rules . It applies upon any keyboard
+  # (including the ones on mice, etc...) addition, removal.
   restart_hkd_rule=''
-  restart_hkd_rule="$restart_hkd_rule"'ACTION=="add", '
-  restart_hkd_rule="$restart_hkd_rule"'SUBSYSTEM=="input", '
-  restart_hkd_rule="$restart_hkd_rule"'SUBSYSTEMS=="usb", '
-  restart_hkd_rule="$restart_hkd_rule"'ENV{ID_INPUT_KEYBOARD}=="1", '
+  restart_hkd_rule="$restart_hkd_rule"'SUBSYSTEMS=="pci|usb|platform|acpi", '
+  restart_hkd_rule="$restart_hkd_rule"'IMPORT{builtin}="path_id"'
+  restart_hkd_rule="$restart_hkd_rule\n"
+  restart_hkd_rule="$restart_hkd_rule"'ENV{ID_PATH}=="?*", '
+  restart_hkd_rule="$restart_hkd_rule"'KERNEL=="event*", '
+  restart_hkd_rule="$restart_hkd_rule"'ENV{ID_INPUT_KEYBOARD}=="?*", '
   restart_hkd_rule="$restart_hkd_rule"'RUN+="/etc/udev/restart-hkd.sh"'
   echo $restart_hkd_rule >99-restart-hkd.rules
   chmod o+rx 99-restart-hkd.rules
