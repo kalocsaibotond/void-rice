@@ -36,10 +36,9 @@ sudo make install
 
 printf "\nMaking runit service from hkd and configure it.\n\n"
 
-if ! [ -d /etc/sv/hkd ]; then
+if ! [ -f /etc/sv/hkd/run ]; then
   echo '#!/bin/sh
-keyboards=$(find /dev/input/by-path/ -name "*kbd*" | tr "\n" " ")
-exec /usr/local/bin/hkd $keyboards > /dev/null' >run
+exec /usr/local/bin/hkd /dev/input/by-path/*kbd > /dev/null' >run
   chmod o+rx run
   sudo mkdir -p /etc/sv/hkd
   sudo mv run /etc/sv/hkd/
