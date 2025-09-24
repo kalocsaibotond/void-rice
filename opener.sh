@@ -46,12 +46,14 @@ IMAGE_CACHE_PATH="$(dirname "$1")"/.thumbs
 
 FILEPATH="$1"
 FILENAME=$(basename "$1")
-EDITOR="${VISUAL:-${EDITOR:-vi}}"
-PAGER="${PAGER:-less -R}"
 EXTENSION="${FILENAME##*.}"
 if [ -n "$EXTENSION" ]; then
   EXTENSION="$(printf "%s" "${EXTENSION}" | tr '[:upper:]' '[:lower:]')"
 fi
+
+EDITOR="${VISUAL:-${EDITOR:-vi}}"
+PAGER="${PAGER:-less -R}"
+BROWSER="${BROWSER:-surf}" # Assumes GUI browser
 
 TERMINAL_COLUMNS=$(tput cols)
 TERMINAL_LINES=$(tput lines)
@@ -594,7 +596,9 @@ t_handle_html() {
 
 handle_html() {
   if [ "$GUI" -ne 0 ]; then
-    if command -v surf >/dev/null 2>&1; then
+    if command -v $BROWSER >/dev/null 2>&1; then
+      devour $BROWSER "${FILEPATH}"
+    elif command -v surf >/dev/null 2>&1; then
       devour surf "${FILEPATH}"
     elif command -v netsurf >/dev/null 2>&1; then
       devour netsurf "${FILEPATH}"
