@@ -15,13 +15,21 @@ sudo git checkout -b my_slstatus || return 1
 printf "\nConfiguring slstatus\n\n"
 sudo cp config.def.h config.h
 
+# Search for batteries:
+slstatus_batteries="\n"
+for battery in /sys/class/power_supply/[bB][aA][tT]*; do
+  battery=$(basename $battery)
+  echo "Found battery: $battery"
+  slstatus_batteries="$slstatus_batteries	{ battery_perc,"
+  slstatus_batteries="$slstatus_batteries \"$battery: %s%%, \","
+  slstatus_batteries="$slstatus_batteries \"$battery\"  },\n"
+done
+
 echo 'set number
 /function format
 +
-.,. change
-	{ battery_perc, "bat: %s%%,",   "BAT1" },
-	{ keymap, " kb: %s,",         NULL },
-	{ datetime, " %s",            "%F %T" },
+.,. change'"$slstatus_batteries"'	{ keymap,       "kb: %s, ",     NULL    },
+	{ datetime,     "%s",           "%F %T" },
 .
 xit' | sudo ex config.h
 
