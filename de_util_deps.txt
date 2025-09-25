@@ -88,7 +88,7 @@ qalculate
 tldr
 nodejs  # Needed for LSP servers.
 qemu  # It is primarily for experimenting with my desktop environment builds.
-freerdp  # I need to remote work on Windows machines.
+freerdp3  # I need to remote work on Windows machines.
 
 ##############
 # GUI utilites
