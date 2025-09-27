@@ -47,4 +47,9 @@ if [ -n "$(find /sys/class/bluetooth/ -name [hH][cH][iH]*)" ]; then
   dependencies="${dependencies} ${bluetooth_tools}"
 fi
 
+if [ -n "$(echo "$pci_devices\n$usb_devices" | grep -e 'NVIDIA')" ]; then
+  printf "\nAdd nvidia package because NVIDIA cards are detected:\n\n"
+  dependencies="${dependencies} nvidia"
+fi
+
 sudo $env_vars xbps-install -Sy $dependencies
