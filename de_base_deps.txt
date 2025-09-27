@@ -43,6 +43,7 @@ physlock
 gpm
 alsa-utils
 
+curl  # For linuxbrew, surf.
 w3m
 w3m-img  # Needed for image support in w3m console browser
 

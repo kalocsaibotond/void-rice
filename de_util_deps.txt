@@ -64,7 +64,6 @@ python3-neovim
 neovim
 
 # Network management
-curl  # Needed for linuxbrew
 xh
 gping
 netcat
