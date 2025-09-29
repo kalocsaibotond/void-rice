@@ -8,7 +8,7 @@ else
   env_vars=''
 fi
 
-dependencies="void-repo-nonfree"
+dependencies=""
 pci_devices=$(lspci)
 usb_devices=$(lsusb)
 
@@ -52,4 +52,5 @@ if [ -n "$(echo "$pci_devices\n$usb_devices" | grep -e 'NVIDIA')" ]; then
   dependencies="${dependencies} nvidia"
 fi
 
+sudo $env_vars xbps-install -Sy void-repo-nonfree
 sudo $env_vars xbps-install -Sy $dependencies

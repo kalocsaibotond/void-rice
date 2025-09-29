@@ -55,5 +55,4 @@ noto-fonts-emoji
 nerd-fonts-symbols-ttf
 
 # Miscellaneous
-neofetch
 void-repo-nonfree
