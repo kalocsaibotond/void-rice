@@ -4,9 +4,9 @@
 base-devel
 libX11-devel  # For st, slstatus.
 libXft-devel  # For dwm, st.
-libXinerama-devel  # For dwm
+libXinerama-devel  # For dwm.
 libwebkit2gtk41-devel  # For surf.
-gcr-devel  # For surf
+gcr-devel  # For surf.
 git-netrc  # It only implements the get interface, needs an ~/.netrc(.gpg) file.
 libevdev-devel # For hkd.
 wget
@@ -15,7 +15,7 @@ wget
 # Graphical desktop environment
 ###############################
 xorg-minimal
-xorg-fonts  # Without it a lot of symbols would miss
+xorg-fonts  # Without it a lot of symbols would miss.
 setxkbmap
 xrandr
 xgamma
@@ -43,11 +43,12 @@ physlock
 gpm
 alsa-utils
 
+curl  # For surf, linuxbrew.
 w3m
-w3m-img  # Needed for image support in w3m console browser
+w3m-img  # Needed for image support in w3m console browser.
 
 # Framebuffer only
-fbpdf  # Uses the mupdf library
+fbpdf  # Uses the mupdf library.
 
 # Nerd-fonts
 font-open-dyslexic-ttf
