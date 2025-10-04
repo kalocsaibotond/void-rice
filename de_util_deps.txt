@@ -9,6 +9,7 @@ readline-devel # It is needed for building nnn.
 
 # System
 evtest
+glxinfo # For diagnosing OpenGL problems.
 
 # Wifi
 iwd

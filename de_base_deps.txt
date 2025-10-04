@@ -28,6 +28,11 @@ xclip
 dmenu  # It is also needed for surf.
 slock
 
+# For OpenGL rendering (in surf).
+mesa-dri
+mesa-vaapi
+mesa-vdpau
+
 # Basic utilites
 sxiv
 fim
