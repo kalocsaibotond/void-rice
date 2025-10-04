@@ -710,7 +710,7 @@ handle_bittorrent() {
 handle_extension() {
   case "${EXTENSION}" in
 
-  a | ar | ace | alz | arc | arj | bz | bz2 | bz3 | cab | cpio | deb | udeb | \
+  ace | alz | arc | arj | bz | bz2 | bz3 | cab | cpio | deb | udeb | \
     xbps | gz | jar | tha | lz | lzh | lha | lzma | lzo | rpm | rz | t7z | \
     tar | tbz | tbz2 | tbz3 | tgz | tlz | txz | tZ | tzo | war | xpi | xz | \
     Z | zip | zipx)
@@ -844,7 +844,7 @@ handle_mime() {
   mimetype="${1}"
   case "${mimetype}" in
 
-  application/x-archive | application/x-ace | application/x-alz | \
+  application/x-ace | application/x-alz | \
     application/x-arj | application/x-bzip* | application/vnd.ms-cab-compressed | \
     application/x-cpio* | application/vnd.debian.binary-package | \
     application/gzip | application/java-archive | application/x-lzip | \
