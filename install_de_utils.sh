@@ -21,12 +21,7 @@ sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_util_deps.txt)
 
 ./install_nnn.sh $1
 
-##############################
-printf "\nSetting up IWD.\n\n"
-##############################
-sudo rm /var/service/wpa_supplicant
-sudo ln -sf /etc/sv/dbus /var/service
-sudo ln -sf /etc/sv/iwd /var/service
+./set_up_iwd.sh
 
 ##############################
 printf "\nSetting up TLP.\n\n"
