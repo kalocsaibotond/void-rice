@@ -24,7 +24,8 @@ hplip  # For my HP printer.
 cnijfilter2  # For my Canon pixma printer.
 sane  # I often scan documents.
 
-# Backup package managers
+# Package management
+xtools
 flatpak
 
 # Directory tree management
