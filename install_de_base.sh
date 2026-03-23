@@ -17,7 +17,9 @@ sudo $env_vars xbps-install -Syu
 ################################################################
 printf "\nInstalling base desktop environment dependencies:\n\n"
 ################################################################
-sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_base_deps.txt)
+if ! sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_base_deps.txt); then
+  return 1
+fi
 sudo ln -sf $(xbps-query -f w3m-img | grep w3mimgdisplay) \
   /usr/local/bin
 

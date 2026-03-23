@@ -53,7 +53,9 @@ if [ -n "$(echo "$pci_devices\n$usb_devices" | grep -e 'NVIDIA')" ]; then
 fi
 
 sudo $env_vars xbps-install -Sy void-repo-nonfree
-sudo $env_vars xbps-install -Sy $dependencies
+if ! sudo $env_vars xbps-install -Sy $dependencies; then
+  return 1
+fi
 
 if [ -d "/etc/sv/tlp" ]; then
   printf "\nSetting up TLP.\n\n"
