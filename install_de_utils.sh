@@ -62,8 +62,3 @@ fi
 printf "\nSetting up Neovim:\n\n"
 #################################
 sudo npm install -g neovim # The main text editor of my system.
-
-####################################################
-printf "\nInstalling my dotfiles (with Chezmoi):\n\n"
-####################################################
-chezmoi init kalocsaibotond
