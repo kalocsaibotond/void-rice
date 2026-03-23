@@ -98,5 +98,6 @@ zathura-cb
 zathura-ps
 
 lyx  # This also gets texlive.
+libreoffice # I have to work with ms office documents.
 inkscape
 gimp
