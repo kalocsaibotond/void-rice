@@ -22,8 +22,6 @@ sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_util_deps.txt)
 ./install_xdeb.sh $1
 ./install_nnn.sh $1
 
-./set_up_iwd.sh
-
 ##############################
 printf "\nSetting up TLP.\n\n"
 ##############################

@@ -11,9 +11,6 @@ readline-devel # It is needed for building nnn.
 evtest
 glxinfo # For diagnosing OpenGL problems.
 
-# Wifi
-iwd
-
 # Power management
 acpi
 powertop
