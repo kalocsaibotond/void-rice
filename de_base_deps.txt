@@ -60,4 +60,5 @@ noto-fonts-emoji
 nerd-fonts-symbols-ttf
 
 # Miscellaneous
+xmirror
 void-repo-nonfree
