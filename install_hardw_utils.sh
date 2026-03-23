@@ -54,3 +54,8 @@ fi
 
 sudo $env_vars xbps-install -Sy void-repo-nonfree
 sudo $env_vars xbps-install -Sy $dependencies
+
+if [ -d "/etc/sv/tlp" ]; then
+  printf "\nSetting up TLP.\n\n"
+  sudo ln -sf /etc/sv/tlp /var/service # I usually work on laptops.
+fi

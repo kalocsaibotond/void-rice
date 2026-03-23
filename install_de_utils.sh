@@ -22,11 +22,6 @@ sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_util_deps.txt)
 ./install_xdeb.sh $1
 ./install_nnn.sh $1
 
-##############################
-printf "\nSetting up TLP.\n\n"
-##############################
-sudo ln -sf /etc/sv/tlp /var/service # I usually work on laptops.
-
 ###############################
 printf "\nSetting up CUPS.\n\n"
 ###############################
