@@ -7,7 +7,7 @@ libXft-devel  # For dwm, st.
 libXinerama-devel  # For dwm.
 libwebkit2gtk41-devel  # For surf.
 gcr-devel  # For surf.
-git-netrc  # It only implements the get interface, needs an ~/.netrc(.gpg) file.
+git-netrc  # It needs an ~/.netrc(.gpg) file with user read and write permission.
 libevdev-devel # For hkd.
 wget
 

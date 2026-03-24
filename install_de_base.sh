@@ -29,10 +29,14 @@ printf "\nInstalling system-wide opener."
 sudo ln -sf $(pwd)/opener.sh /usr/local/bin/opener
 
 #####################################################################
-printf "\nConfiguring git globally with my credentials for root:\n\n"
+printf "\nConfiguring git globally:\n\n"
 #####################################################################
 sudo git config --global user.email "kalocsaibotond@gmail.com"
 sudo git config --global user.name "Botond Kalocsai"
+# WARN: git-credential-netrc needs an user read and write access on the
+# netrc file. We also only accept encrypted netrc file.
+sudo git config --system credential.helper \
+  "$(xbps-query -f git-netrc) -f ~/.netrc.gpg"
 
 ##############################################################################
 printf "\nSystem-wide, from source, local installation of basic utilites:\n\n"
