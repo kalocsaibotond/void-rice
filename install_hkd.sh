@@ -38,6 +38,22 @@ printf "\nMaking runit service from hkd and configure it.\n\n"
 
 if ! [ -f /etc/sv/hkd/run ]; then
   echo '#!/bin/sh
+
+# WARN: The following two commands are needed to prevent a disabled input
+# device state with hkd affected input devices (like keyboards).
+# NOTE: For each affected devices, hkd clones the device file. it mutes
+# original device files and emits the hardware input through the clone
+# device files (in a filtered manner).
+# During boot, hkd as a service initializes way faster then uinput and
+# udevd initializes.
+# Due to this, udevd fails to tag the clone devices with the appropriate
+# attributes and/or properties (for keyboard ID_INPUT_KEY=1 and
+# ID_INPUT_KEYBOARD=1 properties) that Xorg uses for input device
+# identification. The following two commands delays the start of hkd after the
+# uinput and udevd initialisation.
+modprobe uinput > /dev/null
+udevadm settle
+
 exec /usr/local/bin/hkd /dev/input/by-path/*kbd > /dev/null' >run
   chmod o+rx run
   sudo mkdir -p /etc/sv/hkd
