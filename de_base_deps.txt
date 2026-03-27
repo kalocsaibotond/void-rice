@@ -31,6 +31,7 @@ slock
 # For OpenGL rendering (in surf).
 mesa-dri
 mesa-vaapi
+gstreamer-vaapi
 
 # Basic utilites
 sxiv
