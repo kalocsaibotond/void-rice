@@ -39,6 +39,17 @@ if ! grep -q "$set_nnn_opener" /etc/profile.d/*; then
   sudo mv set-nnn-opener.sh /etc/profile.d/
 fi
 
-sudo chmod o+rx ./plugins/*
+# NOTE: Since nnn only allow user level configuration, we create a symbolic
+# link in each user home directory to the official plugin folder of nnn
+# repository. To prevent collusion with user plugins, the official plugins are
+# available in a subfolder-like symbolic link named official. The official
+# subfolder symbolic link is in the default plugin location.
+sudo chmod -R o+rx ./plugins/*
+sudo mkdir -p /etc/skel/.config/nnn/plugins
+sudo ln -sf $PWD/plugins /etc/skel/.config/nnn/plugins/official
+user_homedirs=$(awk -F : '( 1000 <= $3 ){ print $6 }' /etc/passwd)
+for user_homedir in $user_homedirs; do
+  sudo ln -sf $PWD/plugins $user_homedir/.config/nnn/plugins/official
+done
 
 sudo make O_NERD=1 install
