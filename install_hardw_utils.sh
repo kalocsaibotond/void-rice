@@ -61,3 +61,11 @@ if [ -d "/etc/sv/tlp" ]; then
   printf "\nSetting up TLP.\n\n"
   sudo ln -sf /etc/sv/tlp /var/service # I usually work on laptops.
 fi
+
+asus_fan_file="/sys/devices/platform/asus-nb-wmi/fan_boost_mode"
+if [ -f "$asus_fan_file" ]; then
+  echo "#!/bin/sh
+cat $asus_fan_file" > get-fan-boost-mode
+  chmod uo+rx get-fan-boost-mode
+  sudo mv get-fan-boost-mode /usr/local/bin
+fi
