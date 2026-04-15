@@ -96,6 +96,41 @@ if ! grep -q "$suckless_xinitrc" /etc/X11/xinit/xinitrc.d/*; then
   sudo mv 99-suckless-xinitrc.sh /etc/X11/xinit/xinitrc.d/
 fi
 
+printf "\nSetting up /etc/skel/.xinitrc .\n\n"
+echo '#!/bin/sh
+
+# The recommended way to configure your .xinitrc is to place your readable
+# configs in $HOME/xinitrc.d/*.sh .
+
+if [ -d $HOME/.xinitrc.d ]; then
+  for f in $HOME/.xinitrc.d/*.sh; do
+    [ -r "$f" ] && . "$f"
+  done
+  unset f
+fi' >.xinitrc
+chmod o+rx .xinitrc
+sudo mv .xinitrc /etc/skel/.xinitrc
+sudo mkdir -p /etc/skel/.xinitrc.d
+
+source_system_wide_xinitrc='[ -r /etc/X11/xinit/xinitrc ] && . /etc/X11/xinit/xinitrc'
+if ! grep -q "$source_system_wide_xinitrc" /etc/skel/.xinitrc.d/*; then
+  echo "$source_system_wide_xinitrc" >99-source-system-wide-xinitrc.sh
+  chmod o+rx 99-source-system-wide-xinitrc.sh
+  sudo mv 99-source-system-wide-xinitrc.sh /etc/skel/.xinitrc.d
+fi
+
+awk -F : '( 1000 <= $3 ){ print $1 ":" $6 }' /etc/passwd |
+  while IFS=: read -r user home; do
+    [ -f "$home/.xinitrc" ] || {
+      sudo cp "/etc/skel/.xinitrc" "$home"
+      sudo chown "$user:$user" "$home/.xinitrc"
+    }
+    [ -d "$home/.xinitrc.d" ] || {
+      sudo cp -r "/etc/skel/.xinitrc.d" "$home"
+      sudo chown -R "$user:$user" "$home/.xinitrc.d"
+    }
+  done
+
 ######################################################################
 printf "\nSetting up console and shell system-wide configuration.\n\n"
 ######################################################################
@@ -182,7 +217,7 @@ fi
 
 printf "\nSetting up Bash to source the value of ENV environment variable.\n\n"
 # Source POSIX shell configuration in bashrc
-source_env='[ -f "$ENV" ] && . $ENV'
+source_env='[ -r "$ENV" ] && . $ENV'
 sudo mkdir -p /etc/bash/bashrc.d/
 if ! grep -q "$source_env" /etc/bash/bashrc.d/*; then
   echo "$source_env" >00-source-env.sh
