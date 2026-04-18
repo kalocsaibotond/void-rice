@@ -97,39 +97,26 @@ if ! grep -q "$suckless_xinitrc" /etc/X11/xinit/xinitrc.d/*; then
 fi
 
 printf "\nSetting up /etc/skel/.xinitrc .\n\n"
-echo '#!/bin/sh
-
-# The recommended way to configure your .xinitrc is to place your readable
-# configs in $HOME/xinitrc.d/*.sh .
-
-if [ -d $HOME/.xinitrc.d ]; then
+user_xinitrc='if [ -d $HOME/.xinitrc.d ]; then
   for f in $HOME/.xinitrc.d/*.sh; do
     [ -r "$f" ] && . "$f"
   done
   unset f
-fi' >.xinitrc
-chmod o+rx .xinitrc
-sudo mv .xinitrc /etc/skel/.xinitrc
-sudo mkdir -p /etc/skel/.xinitrc.d
-
-source_system_wide_xinitrc='[ -r /etc/X11/xinit/xinitrc ] && . /etc/X11/xinit/xinitrc'
-if ! grep -q "$source_system_wide_xinitrc" /etc/skel/.xinitrc.d/*; then
-  echo "$source_system_wide_xinitrc" >99-source-system-wide-xinitrc.sh
-  chmod o+rx 99-source-system-wide-xinitrc.sh
-  sudo mv 99-source-system-wide-xinitrc.sh /etc/skel/.xinitrc.d
 fi
 
-awk -F : '( 1000 <= $3 ){ print $1 ":" $6 }' /etc/passwd |
-  while IFS=: read -r user home; do
-    [ -f "$home/.xinitrc" ] || {
-      sudo cp "/etc/skel/.xinitrc" "$home"
-      sudo chown "$user:$user" "$home/.xinitrc"
-    }
-    [ -d "$home/.xinitrc.d" ] || {
-      sudo cp -r "/etc/skel/.xinitrc.d" "$home"
-      sudo chown -R "$user:$user" "$home/.xinitrc.d"
-    }
-  done
+. /etc/X11/xinit/xinitrc  # Sourcing system-wide xinitrc.'
+if ! [ -r /etc/skel/.xinitrc ] || ! grep -q "$user_xinitrc" /etc/skel/.xinitrc; then
+  echo '#!/bin/sh
+
+# The recommended way to configure your Xorg startup is to place your readable
+# configs in $HOME/.xinitrc.d/*.sh .
+
+' >.xinitrc
+  echo "$user_xinitrc" >>.xinitrc
+  chmod o+rx .xinitrc
+  sudo mv .xinitrc /etc/skel/.xinitrc
+fi
+sudo mkdir -p /etc/skel/.xinitrc.d
 
 ######################################################################
 printf "\nSetting up console and shell system-wide configuration.\n\n"
@@ -176,7 +163,7 @@ if [ -d /etc/shrc.d ]; then
   done
   unset f
 fi'
-if ! [ -f /etc/shrc ] || ! grep -q "$sys_shrc" /etc/shrc; then
+if ! [ -r /etc/shrc ] || ! grep -q "$sys_shrc" /etc/shrc; then
   echo '#!/bin/sh
 # /etc/shrc
 
@@ -224,6 +211,87 @@ if ! grep -q "$source_env" /etc/bash/bashrc.d/*; then
   chmod o+rx 00-source-env.sh
   sudo mv 00-source-env.sh /etc/bash/bashrc.d/
 fi
+
+printf "\nSetting up /etc/skel/.shrc .\n\n"
+user_shrc='# Only apply in interactive shell sessions
+case $- in
+*i*) ;; # Interactive shell session
+*) return ;;
+esac
+
+. /etc/shrc  # Sourcing system-wide POSIX interactive shell startup file
+
+if [ -d $HOME/.shrc.d ]; then
+  for f in $HOME/.shrc.d/*.sh; do
+    [ -r "$f" ] && . "$f"
+  done
+  unset f
+fi'
+if ! [ -r /etc/skel/.shrc ] || ! grep -q "$user_shrc" /etc/skel/.shrc; then
+  echo '#!/bin/sh
+
+# The recommended way to configure the POSIX interactive shell startup is to
+# place your readable configs in $HOME/.shrc.d/*.sh .
+
+' >.shrc
+  echo "$user_shrc" >>.shrc
+  chmod o+rx .shrc
+  sudo mv .shrc /etc/skel/.shrc
+fi
+sudo mkdir -p /etc/skel/.shrc.d
+
+printf "\nSetting up /etc/skel/.profile .\n\n"
+user_profile='export ENV=$HOME/.shrc  # The recommended POSIX shell interactive startup file.
+
+if [ -d $HOME/.profile.d ]; then
+  for f in $HOME/.profile.d/*.sh; do
+    [ -r "$f" ] && . "$f"
+  done
+  unset f
+fi
+
+[ -r $ENV ] && . $ENV'
+if ! [ -r /etc/skel/.profile ] || ! grep -q "$user_profile" /etc/skel/.profile; then
+  echo '#!/bin/sh
+
+# The recommended way to configure the POSIX login shell startup is to place
+# your readable configs in $HOME/.profile.d/*.sh .
+
+' >.profile
+  echo "$user_profile" >>.profile
+  chmod o+rx .profile
+  sudo mv .profile /etc/skel/.profile
+fi
+sudo mkdir -p /etc/skel/.profile.d
+
+printf "\nConditionally copy /etc/skel content to user home directories:\n\n"
+awk -F : '( 1000 <= $3 ){ print $1 ":" $6 }' /etc/passwd |
+  while IFS=: read -r user home; do
+    [ -f "$home/.xinitrc" ] || {
+      sudo cp "/etc/skel/.xinitrc" "$home"
+      sudo chown "$user:$user" "$home/.xinitrc"
+    }
+    [ -d "$home/.xinitrc.d" ] || {
+      sudo cp -r "/etc/skel/.xinitrc.d" "$home"
+      sudo chown -R "$user:$user" "$home/.xinitrc.d"
+    }
+    [ -f "$home/.shrc" ] || {
+      sudo cp "/etc/skel/.shrc" "$home"
+      sudo chown "$user:$user" "$home/.shrc"
+    }
+    [ -d "$home/.shrc.d" ] || {
+      sudo cp -r "/etc/skel/.shrc.d" "$home"
+      sudo chown -R "$user:$user" "$home/.shrc.d"
+    }
+    [ -f "$home/.profile" ] || {
+      sudo cp "/etc/skel/.profile" "$home"
+      sudo chown "$user:$user" "$home/.profile"
+    }
+    [ -d "$home/.profile.d" ] || {
+      sudo cp -r "/etc/skel/.profile.d" "$home"
+      sudo chown -R "$user:$user" "$home/.profile.d"
+    }
+  done
 
 ############################################################
 printf "\nConfiguring fontconfig for nerd font symbols:\n\n"
