@@ -186,6 +186,16 @@ if ! grep -q "$set_env" /etc/profile.d/*; then
   sudo mv 00-set-env.sh /etc/profile.d/
 fi
 
+printf "\nSetting conditionally sourcing of ENV at the end of /etc/profile .\n\n"
+cond_source_env='if [ ! -r "$HOME/.profile" ] && [ -r $ENV ]; then
+  . $ENV
+fi'
+if ! grep -F -q '. $ENV' /etc/profile.d/*; then
+  echo "$cond_source_env" >zz-conditionally-source-env.sh
+  chmod o+rx zz-conditionally-source-env.sh
+  sudo mv zz-conditionally-source-env.sh /etc/profile.d/
+fi
+
 printf "\nSetting up POSIX shell SHELL_NAME environment variable.\n\n"
 set_shell_name='export SHELL_NAME=$(ps -p $$ -o comm=)'
 if ! grep -q "$set_shell_name" /etc/shrc.d/*; then
