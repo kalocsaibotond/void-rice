@@ -44,16 +44,15 @@ sudo $env_vars flatpak remote-add --if-not-exists flathub \
 #################################
 printf "\nSetting up Zoxide.\n\n"
 #################################
-zoxide_init='case $SHELL_NAME in
+if ! grep -F -q "zoxide init" /etc/shrc.d/*; then
+  echo 'case $SHELL_NAME in
 "zsh") eval "$(zoxide init zsh --hook prompt)" ;;
 "bash") eval "$(zoxide init bash --hook prompt)" ;;
 "ksh") eval "$(zoxide init ksh --hook prompt)" ;;
 "mksh") eval "$(zoxide init ksh --hook prompt)" ;;
 "oksh") eval "$(zoxide init ksh --hook prompt)" ;;
 *) eval "$(zoxide init posix --hook prompt)" ;;
-esac'
-if ! grep -q "$zoxide_init" /etc/shrc.d/*; then
-  echo "$zoxide_init" >99-zoxide-initialisation.sh
+esac' >99-zoxide-initialisation.sh
   chmod o+rx 99-zoxide-initialisation.sh
   sudo mv 99-zoxide-initialisation.sh /etc/shrc.d/
 fi
