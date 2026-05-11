@@ -85,7 +85,7 @@ gnuplot
 qalculate
 
 # MIscellaneous
-tldr
+tlrc
 nodejs  # Needed for LSP servers.
 qemu  # It is primarily for experimenting with my desktop environment builds.
 freerdp3  # I need to remote work on Windows machines.
