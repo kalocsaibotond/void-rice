@@ -56,6 +56,8 @@ echo 'set number
 .,. s/=[^=]\{1,\};/= 3.0 \/ 2.0;/
 /cypropoffset =
 .,. s/=[^=]\{1,\};/= 1.0 \/ 3.0;/
+/allowwindowops =
+.,. s/=[^=]\{1,\};/= 1;/
 /boxdraw =
 .,. s/=[^=]\{1,\};/= 1;/
 /boxdraw_bold =
