@@ -15,7 +15,7 @@ sudo ln -s $PWD/xdeb /usr/local/bin/xdeb
 
 set_xdeb_pkgroot='export XDEB_PKGROOT=${HOME}/.config/xdeb'
 if ! grep -F -q "$set_xdeb_pkgroot" /etc/profile.d/*; then
-  echo "$set_xdeb_pkgroot" >set-xdeb-pkgroot.sh
-  chmod o+rx set-xdeb-pkgroot.sh
-  sudo mv set-xdeb-pkgroot.sh /etc/profile.d/
+  echo "$set_xdeb_pkgroot" >set_xdeb_pkgroot.sh
+  chmod o+rx set_xdeb_pkgroot.sh
+  sudo mv set_xdeb_pkgroot.sh /etc/profile.d/
 fi

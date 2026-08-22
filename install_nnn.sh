@@ -13,30 +13,30 @@ cd nnn || return 1
 
 set_nnn_fifo='export NNN_FIFO=/tmp/nnn.fifo'
 if ! grep -F -q "$set_nnn_fifo" /etc/profile.d/*; then
-  echo "$set_nnn_fifo" >set-nnn-fifo.sh
-  chmod o+rx set-nnn-fifo.sh
-  sudo mv set-nnn-fifo.sh /etc/profile.d/
+  echo "$set_nnn_fifo" >set_nnn_fifo.sh
+  chmod o+rx set_nnn_fifo.sh
+  sudo mv set_nnn_fifo.sh /etc/profile.d/
 fi
 
 set_nnn_sel='export NNN_SEL=/tmp/.sel'
 if ! grep -F -q "$set_nnn_sel" /etc/profile.d/*; then
-  echo "$set_nnn_sel" >set-nnn-sel.sh
-  chmod o+rx set-nnn-sel.sh
-  sudo mv set-nnn-sel.sh /etc/profile.d/
+  echo "$set_nnn_sel" >set_nnn_sel.sh
+  chmod o+rx set_nnn_sel.sh
+  sudo mv set_nnn_sel.sh /etc/profile.d/
 fi
 
 set_nnn_locker='export NNN_LOCKER=physlock'
 if ! grep -F -q "$set_nnn_locker" /etc/profile.d/*; then
-  echo "$set_nnn_locker" >set-nnn-locker.sh
-  chmod o+rx set-nnn-locker.sh
-  sudo mv set-nnn-locker.sh /etc/profile.d/
+  echo "$set_nnn_locker" >set_nnn_locker.sh
+  chmod o+rx set_nnn_locker.sh
+  sudo mv set_nnn_locker.sh /etc/profile.d/
 fi
 
 set_nnn_opener='export NNN_OPENER=opener'
 if ! grep -F -q "$set_nnn_opener" /etc/profile.d/*; then
-  echo "$set_nnn_opener" >set-nnn-opener.sh
-  chmod o+rx set-nnn-opener.sh
-  sudo mv set-nnn-opener.sh /etc/profile.d/
+  echo "$set_nnn_opener" >set_nnn_opener.sh
+  chmod o+rx set_nnn_opener.sh
+  sudo mv set_nnn_opener.sh /etc/profile.d/
 fi
 
 # NOTE: Since nnn only allow user level configuration, we create a symbolic

@@ -52,9 +52,9 @@ if ! grep -F -q "zoxide init" /etc/shrc.d/*; then
 "mksh") eval "$(zoxide init ksh --hook prompt)" ;;
 "oksh") eval "$(zoxide init ksh --hook prompt)" ;;
 *) eval "$(zoxide init posix --hook prompt)" ;;
-esac' >99-zoxide-initialisation.sh
-  chmod o+rx 99-zoxide-initialisation.sh
-  sudo mv 99-zoxide-initialisation.sh /etc/shrc.d/
+esac' >99_zoxide_initialisation.sh
+  chmod o+rx 99_zoxide_initialisation.sh
+  sudo mv 99_zoxide_initialisation.sh /etc/shrc.d/
 fi
 
 #################################

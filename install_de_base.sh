@@ -89,10 +89,10 @@ sudo mv xinitrc /etc/X11/xinit/
 printf "\nSetting up xinitrc to run dwm and slstatus upon calling startx.\n\n"
 suckless_xinitrc="slstatus & exec dwm"
 if ! grep -F -q "$suckless_xinitrc" /etc/X11/xinit/xinitrc.d/*; then
-  echo "$suckless_xinitrc" >99-suckless-xinitrc.sh
-  chmod o+rx 99-suckless-xinitrc.sh
+  echo "$suckless_xinitrc" >99_suckless_xinitrc.sh
+  chmod o+rx 99_suckless_xinitrc.sh
   sudo mkdir -p /etc/X11/xinit/xinitrc.d/
-  sudo mv 99-suckless-xinitrc.sh /etc/X11/xinit/xinitrc.d/
+  sudo mv 99_suckless_xinitrc.sh /etc/X11/xinit/xinitrc.d/
 fi
 
 printf "\nSetting up /etc/skel/.xinitrc .\n\n"
@@ -121,22 +121,22 @@ printf "\nSetting up console and shell system-wide configuration.\n\n"
 ######################################################################
 
 printf "\nSetting up Esc - Caps Lock swap on console:\n\n"
-if ! grep -F -q "loadkeys /etc/swap_esc_capslock.kmap" /etc/rc.local; then
-  dumpkeys >swap_esc_capslock.kmap
+if ! grep -F -q "loadkeys /etc/swap-esc-capslock.kmap" /etc/rc.local; then
+  dumpkeys >swap-esc-capslock.kmap
   echo 'set extended
 set number
 % global!/^keycode.*(Escape|Caps_Lock)/d
 % s/Caps_Lock/caps/
 % s/Escape/Caps_Lock/
 % s/caps/Escape/
-xit' | sudo ex swap_esc_capslock.kmap
-  chmod o+rx swap_esc_capslock.kmap
-  sudo mv swap_esc_capslock.kmap /etc/
+xit' | sudo ex swap-esc-capslock.kmap
+  chmod o+rx swap-esc-capslock.kmap
+  sudo mv swap-esc-capslock.kmap /etc/
   echo 'set number
 $
 append
 
-loadkeys /etc/swap_esc_capslock.kmap
+loadkeys /etc/swap-esc-capslock.kmap
 .
 xit' | sudo ex /etc/rc.local
 fi
@@ -177,34 +177,34 @@ printf "\nSetting POSIX shell ENV environment variable to /etc/profile .\n\n"
 set_env='export ENV=/etc/shrc'
 sudo mkdir -p /etc/profile.d/
 if ! grep -F -q "$set_env" /etc/profile.d/*; then
-  echo "$set_env" >00-set-env.sh
-  chmod o+rx 00-set-env.sh
-  sudo mv 00-set-env.sh /etc/profile.d/
+  echo "$set_env" >00_set_env.sh
+  chmod o+rx 00_set_env.sh
+  sudo mv 00_set_env.sh /etc/profile.d/
 fi
 
 printf "\nSetting conditionally sourcing of ENV at the end of /etc/profile .\n\n"
 if ! grep -F -q '. $ENV' /etc/profile.d/*; then
   echo 'if [ ! -r "$HOME/.profile" ] && [ -r $ENV ]; then
   . $ENV
-fi' >zz-conditionally-source-env.sh
-  chmod o+rx zz-conditionally-source-env.sh
-  sudo mv zz-conditionally-source-env.sh /etc/profile.d/
+fi' >zz_conditionally_source_env.sh
+  chmod o+rx zz_conditionally_source_env.sh
+  sudo mv zz_conditionally_source_env.sh /etc/profile.d/
 fi
 
 printf "\nSetting up POSIX shell SHELL_NAME environment variable.\n\n"
 set_shell_name='export SHELL_NAME=$(ps -p $$ -o comm=)'
 if ! grep -F -q "$set_shell_name" /etc/shrc.d/*; then
-  echo "$set_shell_name" >00-set-shell-name.sh
-  chmod o+rx 00-set-shell-name.sh
-  sudo mv 00-set-shell-name.sh /etc/shrc.d/
+  echo "$set_shell_name" >00_set_shell_name.sh
+  chmod o+rx 00_set_shell_name.sh
+  sudo mv 00_set_shell_name.sh /etc/shrc.d/
 fi
 
 printf "\nSetting up POSIX shell GPG_TTY environment variable.\n\n"
 set_gpg_tty='export GPG_TTY=$(tty)'
 if ! grep -F -q "$set_gpg_tty" /etc/shrc.d/*; then
-  echo "$set_gpg_tty" >10-set-gpg-tty.sh
-  chmod o+rx 10-set-gpg-tty.sh
-  sudo mv 10-set-gpg-tty.sh /etc/shrc.d/
+  echo "$set_gpg_tty" >10_set_gpg_tty.sh
+  chmod o+rx 10_set_gpg_tty.sh
+  sudo mv 10_set_gpg_tty.sh /etc/shrc.d/
 fi
 
 printf "\nSetting up Bash to source the value of ENV environment variable.\n\n"
@@ -212,9 +212,9 @@ printf "\nSetting up Bash to source the value of ENV environment variable.\n\n"
 source_env='[ -r "$ENV" ] && . $ENV'
 sudo mkdir -p /etc/bash/bashrc.d/
 if ! grep -F -q "$source_env" /etc/bash/bashrc.d/*; then
-  echo "$source_env" >00-source-env.sh
-  chmod o+rx 00-source-env.sh
-  sudo mv 00-source-env.sh /etc/bash/bashrc.d/
+  echo "$source_env" >00_source_env.sh
+  chmod o+rx 00_source_env.sh
+  sudo mv 00_source_env.sh /etc/bash/bashrc.d/
 fi
 
 printf "\nSetting up /etc/skel/.shrc .\n\n"

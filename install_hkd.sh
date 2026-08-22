@@ -68,8 +68,8 @@ if ! [ -f /etc/udev/rules.d/99-restart-hkd.rules ]; then
   echo '#!/bin/sh
 if sv status hkd | grep -q "^run"; then
   sv restart hkd > /dev/null
-fi' >restart-hkd.sh
-  chmod o+rx restart-hkd.sh
+fi' >restart_hkd.sh
+  chmod o+rx restart_hkd.sh
 
   # NOTE: This rule is inspired from the by-path link rules of Void linux's
   # /lib/udev/rules.d/60-persistent-input.rules . It applies upon any keyboard
@@ -81,12 +81,12 @@ fi' >restart-hkd.sh
   restart_hkd_rule="$restart_hkd_rule"'ENV{ID_PATH}=="?*", '
   restart_hkd_rule="$restart_hkd_rule"'KERNEL=="event*", '
   restart_hkd_rule="$restart_hkd_rule"'ENV{ID_INPUT_KEYBOARD}=="?*", '
-  restart_hkd_rule="$restart_hkd_rule"'RUN+="/etc/udev/restart-hkd.sh"'
-  echo $restart_hkd_rule >99-restart-hkd.rules
+  restart_hkd_rule="$restart_hkd_rule"'RUN+="/etc/udev/restart_hkd.sh"'
+  echo "$restart_hkd_rule" >99-restart-hkd.rules
   chmod o+rx 99-restart-hkd.rules
 
   sudo mkdir -p /etc/udev/rules.d
 
-  sudo mv restart-hkd.sh /etc/udev/
+  sudo mv restart_hkd.sh /etc/udev/
   sudo mv 99-restart-hkd.rules /etc/udev/rules.d
 fi

@@ -29,7 +29,7 @@ sudo chmod -R o+rx /home/linuxbrew
 printf "\nSetting up Linuxbrew:\n\n"
 brew_init='eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
 if ! grep -F -q "$brew_init" /etc/profile.d/*; then
-  echo "$brew_init" >linuxbrew-initialisation.sh
-  chmod o+rx linuxbrew-initialisation.sh
-  sudo mv linuxbrew-initialisation.sh /etc/profile.d/
+  echo "$brew_init" >linuxbrew_initialisation.sh
+  chmod o+rx linuxbrew_initialisation.sh
+  sudo mv linuxbrew_initialisation.sh /etc/profile.d/
 fi
