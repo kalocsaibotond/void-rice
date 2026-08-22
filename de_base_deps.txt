@@ -42,7 +42,7 @@ mpv
 #############################
 # Console desktop environment
 #############################
-tmux  # It has true color, proper mouse support and performant rendering.
+a4
 reptyr
 physlock
 gpm
