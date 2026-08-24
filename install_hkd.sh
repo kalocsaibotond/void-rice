@@ -24,9 +24,13 @@ static const char *vol_down[] = { "amixer", "set", "Master", "2%-", NULL };
 static const char *vol_toggle_mute[] = { "amixer", "set", "Master", "toggle", NULL };
 .
 
-/term/-,/shutdown/ delete
+/term/-,/shutdown/ change
+static const char *restart_hkd[] = { "nohup", "sh", "/etc/udev/restart_hkd.sh", "&", NULL};
+.
 
-/term/,/shutdown/ delete
+/term/,/shutdown/ change
+    { M_CTRL|M_ALT|M_SHIFT|M_META, KEY_H,         restart_hkd }
+.
 
 xit' | sudo ex config.h
 
