@@ -25,7 +25,7 @@ static const char *vol_toggle_mute[] = { "amixer", "set", "Master", "toggle", NU
 .
 
 /term/-,/shutdown/ change
-static const char *restart_hkd[] = { "nohup", "sh", "/etc/udev/restart_hkd.sh", "&", NULL};
+static const char *restart_hkd[] = { "nohup", "sv" "restart", "hkd", "&", NULL };
 .
 
 /term/,/shutdown/ change
@@ -82,9 +82,11 @@ fi' >restart_hkd.sh
   restart_hkd_rule="$restart_hkd_rule"'SUBSYSTEMS=="pci|usb|platform|acpi", '
   restart_hkd_rule="$restart_hkd_rule"'IMPORT{builtin}="path_id"'
   restart_hkd_rule="$restart_hkd_rule\n"
-  restart_hkd_rule="$restart_hkd_rule"'ENV{ID_PATH}=="?*", '
+  restart_hkd_rule="$restart_hkd_rule"'ACTION=="add", '
+  restart_hkd_rule="$restart_hkd_rule"'SUBSYSTEM=="input", '
   restart_hkd_rule="$restart_hkd_rule"'KERNEL=="event*", '
-  restart_hkd_rule="$restart_hkd_rule"'ENV{ID_INPUT_KEYBOARD}=="?*", '
+  restart_hkd_rule="$restart_hkd_rule"'ENV{ID_PATH}=="?*", '
+  restart_hkd_rule="$restart_hkd_rule"'ENV{ID_INPUT_KEYBOARD}=="1", '
   restart_hkd_rule="$restart_hkd_rule"'RUN+="/etc/udev/restart_hkd.sh"'
   echo "$restart_hkd_rule" >99-restart-hkd.rules
   chmod o+rx 99-restart-hkd.rules
