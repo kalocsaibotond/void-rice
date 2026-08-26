@@ -41,26 +41,28 @@ sudo make install
 printf "\nMaking runit service from hkd and configure it.\n\n"
 
 if ! [ -f '/etc/sv/hkd/run' ]; then
-  echo "#!/bin/sh
+  cat <<'EOF' >run
+#!/bin/sh
 
 # WARN: The following commands are needed to prevent a disabled input
 # device state with hkd affected input devices (like keyboards).
 # NOTE: For each affected devices, hkd clones the device file. it mutes
 # original device files and emits the hardware input through the clone
 # device files (in a filtered manner).
-# During boot, hkd as a service initializes way faster then uinput and
-# udevd initializes.
-# Due to this, the clone devices fail to inherit with the appropriate
-# attributes and/or properties (for keyboard ID_INPUT_KEY=1 and
+# During boot, for some reason eudev fails to tag the clone files with the
+# appropriate attributes and/or properties (for keyboard ID_INPUT_KEY=1 and
 # ID_INPUT_KEYBOARD=1 properties) that Xorg uses for input device
-# identification. The following commands trigger an udev rule that
-# tag the device files given to hkd with ID_INPUT_KEYBOARD=1 .
+# identification.
+# The following commands are to force eudev into a consistent, steady state
+# during boot, in which eudev does its job properly.
 
-udevadm control -p 'SET_ID_INPUT_KEYBOARD=1'
-udevadm trigger -c 'change' /dev/input/by-path/*kbd
-udevadm control -p 'SET_ID_INPUT_KEYBOARD=0'
+for dev_path in $(readlink -f /dev/input/by-path/*kbd); do
+  sys_path="/sys/class/input/$(basename "$dev_path")"
+  udevadm test-builtin 'input_id' "$sys_path" >'/dev/null' 2>&1
+done
 
-exec /usr/local/bin/hkd /dev/input/by-path/*kbd > /dev/null" >'run'
+exec '/usr/local/bin/hkd' /dev/input/by-path/*kbd >'/dev/null'
+EOF
   chmod o+rx 'run'
   sudo mkdir -p '/etc/sv/hkd'
   sudo mv run '/etc/sv/hkd/'
@@ -97,20 +99,4 @@ fi' >'restart_hkd.sh'
 
   sudo mv 'restart_hkd.sh' '/etc/udev/'
   sudo mv '99-restart-hkd.rules' '/etc/udev/rules.d'
-fi
-
-printf "\nCreating udev rule manually setting ID_INPUT_KEYBOARD to 1.\n\n"
-
-if ! [ -f '/etc/udev/rules.d/99-manually-set-id-input-keyboard.rules' ]; then
-  # NOTE: In the hkd service run script this rule is triggered to set
-  # ID_INPUT_KEYBOARD before launching hkd itself .
-  rules="$rules"'ACTION=="change", '
-  rules="$rules"'ENV{SET_ID_INPUT_KEYBOARD}=="1", '
-  rules="$rules"'ENV{ID_INPUT_KEYBOARD}="1", '
-  echo "$rules" >'99-manually-set-id-input-keyboard.rules'
-  chmod o+rx '99-manually-set-id-input-keyboard.rules'
-
-  sudo mkdir -p '/etc/udev/rules.d'
-
-  sudo mv '99-manually-set-id-input-keyboard.rules' '/etc/udev/rules.d'
 fi
