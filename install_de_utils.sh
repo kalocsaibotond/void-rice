@@ -17,29 +17,29 @@ fi
 #######################################################################
 printf "\nIinstalling general utilites of the desktop environment:\n\n"
 #######################################################################
-if ! sudo $env_vars xbps-install -Sy $(./parsedeps.sh de_util_deps.txt); then
+if ! sudo $env_vars xbps-install -Sy "$(./parsedeps.sh 'de_util_deps.txt')"; then
   return 1
 fi
 
-./install_xdeb.sh $1
-./install_nnn.sh $1
+./install_xdeb.sh "$1"
+./install_nnn.sh "$1"
 
 ###############################
 printf "\nSetting up CUPS.\n\n"
 ###############################
-sudo touch /etc/sv/cupsd/down # Rarely, I have to print documents.
-sudo ln -sf /etc/sv/cupsd /var/service
+sudo touch '/etc/sv/cupsd/down' # Rarely, I have to print documents.
+sudo ln -sf '/etc/sv/cupsd' '/var/service'
 
 ########################################
 printf "\nSet XDG default applications."
 ########################################
-sudo ln -sf $(pwd)/mimeapps.list /etc/xdg
+sudo ln -sf "$(pwd -P)/mimeapps.list" '/etc/xdg'
 
 #########################################################
 printf "\nSetting up flatpak (needs reboot to work).\n\n"
 #########################################################
-sudo $env_vars flatpak remote-add --if-not-exists flathub \
-  https://flathub.org/repo/flathub.flatpakrepo
+sudo $env_vars flatpak remote-add --if-not-exists 'flathub' \
+  'https://flathub.org/repo/flathub.flatpakrepo'
 
 #################################
 printf "\nSetting up Zoxide.\n\n"
@@ -52,12 +52,12 @@ if ! grep -F -q "zoxide init" /etc/shrc.d/*; then
 "mksh") eval "$(zoxide init ksh --hook prompt)" ;;
 "oksh") eval "$(zoxide init ksh --hook prompt)" ;;
 *) eval "$(zoxide init posix --hook prompt)" ;;
-esac' >99_zoxide_initialisation.sh
-  chmod o+rx 99_zoxide_initialisation.sh
-  sudo mv 99_zoxide_initialisation.sh /etc/shrc.d/
+esac' >'99_zoxide_initialisation.sh'
+  chmod 'o+rx' '99_zoxide_initialisation.sh'
+  sudo mv '99_zoxide_initialisation.sh' '/etc/shrc.d/'
 fi
 
 #################################
 printf "\nSetting up Neovim:\n\n"
 #################################
-sudo npm install -g neovim # The main text editor of my system.
+sudo npm install -g 'neovim' # The main text editor of my system.

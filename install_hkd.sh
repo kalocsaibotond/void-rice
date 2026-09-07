@@ -41,7 +41,7 @@ sudo make install
 printf "\nMaking runit service from hkd and configure it.\n\n"
 
 if ! [ -f '/etc/sv/hkd/run' ]; then
-  cat <<'EOF' >run
+  cat <<'EOF' >'run'
 #!/bin/sh
 
 # WARN: The following commands are needed to prevent a disabled input
@@ -63,7 +63,7 @@ done
 
 exec '/usr/local/bin/hkd' /dev/input/by-path/*kbd >'/dev/null'
 EOF
-  chmod o+rx 'run'
+  chmod 'o+rx' 'run'
   sudo mkdir -p '/etc/sv/hkd'
   sudo mv run '/etc/sv/hkd/'
 fi
@@ -77,7 +77,7 @@ if ! [ -f '/etc/udev/rules.d/99-restart-hkd.rules' ]; then
 if sv status hkd | grep -q "^run"; then
   sv restart hkd > /dev/null
 fi' >'restart_hkd.sh'
-  chmod o+rx 'restart_hkd.sh'
+  chmod 'o+rx' 'restart_hkd.sh'
 
   # NOTE: This rule is inspired from the by-path link rules of Void linux's
   # /lib/udev/rules.d/60-persistent-input.rules . It applies upon any keyboard
