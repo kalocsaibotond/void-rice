@@ -63,3 +63,4 @@ nerd-fonts-symbols-ttf
 # Miscellaneous
 xmirror
 void-repo-nonfree
+void-docs
