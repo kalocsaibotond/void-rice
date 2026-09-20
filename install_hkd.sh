@@ -25,7 +25,7 @@ static const char *vol_toggle_mute[] = { "amixer", "set", "Master", "toggle", NU
 .
 
 /term/-,/shutdown/ change
-static const char *restart_hkd[] = { "nohup", "sv" "restart", "hkd", "&", NULL };
+static const char *restart_hkd[] = { "sv", "restart", "hkd", NULL };
 .
 
 /term/,/shutdown/ change
