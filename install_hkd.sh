@@ -53,13 +53,12 @@ if ! [ -f '/etc/sv/hkd/run' ]; then
 # appropriate attributes and/or properties (for keyboard ID_INPUT_KEY=1 and
 # ID_INPUT_KEYBOARD=1 properties) that Xorg uses for input device
 # identification.
-# The following commands are to force eudev into a consistent, steady state
-# during boot, in which eudev does its job properly.
+# The following commands trigger an udev rule that
+# tag the device files given to hkd with ID_INPUT_KEYBOARD=1 .
 
-for dev_path in $(readlink -f /dev/input/by-path/*kbd); do
-  sys_path="/sys/class/input/$(basename "$dev_path")"
-  udevadm test-builtin 'input_id' "$sys_path" >'/dev/null' 2>&1
-done
+udevadm control -p 'SET_ID_INPUT_KEYBOARD=1'
+udevadm trigger -c 'change' /dev/input/by-path/*kbd
+udevadm control -p 'SET_ID_INPUT_KEYBOARD=0'
 
 exec '/usr/local/bin/hkd' /dev/input/by-path/*kbd >'/dev/null'
 EOF
@@ -89,6 +88,7 @@ fi' >'restart_hkd.sh'
   rules="$rules"'ACTION=="add", '
   rules="$rules"'SUBSYSTEM=="input", '
   rules="$rules"'KERNEL=="event*", '
+  rules="$rules"'ENV{SET_ID_INPUT_KEYBOARD}!="1", ' # To prevent feedback loop.
   rules="$rules"'ENV{ID_PATH}=="?*", '
   rules="$rules"'ENV{ID_INPUT_KEYBOARD}=="1", '
   rules="$rules"'RUN+="/etc/udev/restart_hkd.sh"'
@@ -99,4 +99,23 @@ fi' >'restart_hkd.sh'
 
   sudo mv 'restart_hkd.sh' '/etc/udev/'
   sudo mv '99-restart-hkd.rules' '/etc/udev/rules.d'
+fi
+
+printf "\nCreating udev rule manually setting ID_INPUT_KEYBOARD to 1.\n\n"
+
+if ! [ -f '/etc/udev/rules.d/99-manually-set-id-input-keyboard.rules' ]; then
+  # NOTE: In the hkd service run script this rule is triggered to set
+  # ID_INPUT_KEYBOARD before launching hkd itself .
+  rules=''
+  rules="$rules"'ACTION=="change", '
+  rules="$rules"'ENV{SET_ID_INPUT_KEYBOARD}=="1", '
+  rules="$rules"'ENV{ID_INPUT}="1", '
+  rules="$rules"'ENV{ID_INPUT_KEY}="1", '
+  rules="$rules"'ENV{ID_INPUT_KEYBOARD}="1"'
+  echo "$rules" >'99-manually-set-id-input-keyboard.rules'
+  chmod o+rx '99-manually-set-id-input-keyboard.rules'
+
+  sudo mkdir -p '/etc/udev/rules.d'
+
+  sudo mv '99-manually-set-id-input-keyboard.rules' '/etc/udev/rules.d'
 fi
