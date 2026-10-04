@@ -15,20 +15,30 @@ sudo git checkout -b my_slstatus || return 1
 printf "\nConfiguring slstatus\n\n"
 sudo cp config.def.h config.h
 
+# Optional status line part.
+slstatus_line="\n"
+
+# Search for ASUS fan boost mode:
+asus_fan_file="/sys/devices/platform/asus-nb-wmi/fan_boost_mode"
+if [ -r "$asus_fan_file" ]; then
+  slstatus_line="$slstatus_line	{ cat,"
+  slstatus_line="$slstatus_line \"Fan mode: %s, \","
+  slstatus_line="$slstatus_line \"$asus_fan_file\"  },\n"
+fi
+
 # Search for batteries:
-slstatus_batteries="\n"
 for battery in /sys/class/power_supply/[bB][aA][tT]*; do
   battery=$(basename $battery)
   echo "Found battery: $battery"
-  slstatus_batteries="$slstatus_batteries	{ battery_perc,"
-  slstatus_batteries="$slstatus_batteries \"$battery: %s%%, \","
-  slstatus_batteries="$slstatus_batteries \"$battery\"  },\n"
+  slstatus_line="$slstatus_line	{ battery_perc,"
+  slstatus_line="$slstatus_line \"$battery: %s%%, \","
+  slstatus_line="$slstatus_line \"$battery\"  },\n"
 done
 
 echo 'set number
 /function format
 +
-.,. change'"$slstatus_batteries"'	{ keymap,       "kb: %s, ",     NULL    },
+.,. change'"$slstatus_line"'	{ keymap,       "kb: %s, ",     NULL    },
 	{ datetime,     "%s",           "%F %T" },
 .
 xit' | sudo ex config.h
