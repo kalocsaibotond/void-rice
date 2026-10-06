@@ -17,7 +17,7 @@ fi
 #######################################################################
 printf "\nIinstalling general utilites of the desktop environment:\n\n"
 #######################################################################
-if ! sudo $env_vars xbps-install -Sy "$(./parsedeps.sh 'de_util_deps.txt')"; then
+if ! sudo $env_vars xbps-install -Sy $(./parsedeps.sh 'de_util_deps.txt'); then
   return 1
 fi
 

@@ -18,7 +18,7 @@ sudo $env_vars xbps-install -Syu
 printf "\nInstalling base desktop environment dependencies:\n\n"
 ################################################################
 if
-  ! sudo $env_vars xbps-install -Sy "$(./parsedeps.sh 'de_base_deps.txt')"
+  ! sudo $env_vars xbps-install -Sy $(./parsedeps.sh 'de_base_deps.txt')
 then
   echo 'Could not install base desktop dependencies!'
   return '1'
