@@ -620,7 +620,9 @@ handle_html() {
 }
 
 handle_markdown() {
-  if command -v glow >/dev/null 2>&1; then
+  if command -v mdless >/dev/null 2>&1; then
+    mdless "${FILEPATH}"
+  elif command -v glow >/dev/null 2>&1; then
     glow -p "${FILEPATH}"
   elif command -v lowdown >/dev/null 2>&1; then
     lowdown -Tterm --term-width="$TERMINAL_COLUMNS" \

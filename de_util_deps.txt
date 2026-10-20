@@ -49,7 +49,7 @@ sd
 miller
 dasel
 fx
-glow
+mdcat
 
 7zip-unrar
 
