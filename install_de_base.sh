@@ -154,9 +154,6 @@ printf "\nConfiguring gpm to not start at boot:\n\n"
 sudo touch '/etc/sv/gpm/down' # I dont want it to start at boot
 sudo ln -sf '/etc/sv/gpm' '/var/service'
 
-printf "\nConfiguring alsa:\n\n"
-sudo ln -sf '/etc/sv/alsa' '/var/service'
-
 printf "\nSetting up interactive POSIX shell startup file /etc/shrc .\n\n"
 if ! [ -r '/etc/shrc' ] ||
   ! grep -F -q 'for f in /etc/shrc.d/*.sh; do' '/etc/shrc'; then
